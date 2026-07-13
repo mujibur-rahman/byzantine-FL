@@ -1,0 +1,75 @@
+fl_base.py loaded successfully.
+Preparing data for adaptive adversary experiments...
+
+============================================================
+  A: Sleeper (delayed activation, T_burn=20)
+============================================================
+    R00 [burn-in] Acc=92.1%  Det(K=100% T=0% O=25%)  FPR=100.0%
+    R10 [burn-in] Acc=97.2%  Det(K=100% T=25% O=0%)  FPR=100.0%
+    R20 [ATTACK] Acc=96.2%  Det(K=100% T=50% O=0%)  FPR=100.0%
+    R21 [ATTACK] Acc=96.2%  Det(K=100% T=75% O=0%)  FPR=100.0%
+    R30 [ATTACK] Acc=97.0%  Det(K=100% T=100% O=0%)  FPR=100.0%
+    R40 [ATTACK] Acc=96.2%  Det(K=100% T=100% O=0%)  FPR=100.0%
+    R50 [ATTACK] Acc=96.2%  Det(K=100% T=100% O=0%)  FPR=100.0%
+
+  Detection latency (rounds after activation):
+    Outlier     : Never rounds
+    Trust       : 0 rounds
+    Kappa       : 0 rounds
+    Combined    : 0 rounds
+  Acc at activation (round 20): 96.2%
+  Acc steady-state (last 5 rounds): 96.3%
+  FPR during burn-in: 100.0%
+
+============================================================
+  B: Mimicry (gradient-constrained poisoning)
+============================================================
+    R00 [burn-in] Acc=92.2%  Det(K=100% T=0% O=25%)  FPR=100.0%
+    R10 [burn-in] Acc=97.2%  Det(K=100% T=25% O=0%)  FPR=100.0%
+    R20 [ATTACK] Acc=96.2%  Det(K=100% T=50% O=0%)  FPR=100.0%
+    R21 [ATTACK] Acc=96.2%  Det(K=100% T=75% O=0%)  FPR=100.0%
+    R30 [ATTACK] Acc=97.2%  Det(K=100% T=100% O=0%)  FPR=100.0%
+    R40 [ATTACK] Acc=96.7%  Det(K=100% T=100% O=0%)  FPR=100.0%
+    R50 [ATTACK] Acc=96.7%  Det(K=100% T=100% O=0%)  FPR=100.0%
+
+  Detection latency (rounds after activation):
+    Outlier     : Never rounds
+    Trust       : 0 rounds
+    Kappa       : 0 rounds
+    Combined    : 0 rounds
+  Acc at activation (round 20): 96.2%
+  Acc steady-state (last 5 rounds): 96.7%
+  FPR during burn-in: 100.0%
+
+============================================================
+  C: Slow drift (ramp 5%/round to 40% flip)
+============================================================
+    R00 [burn-in] Acc=92.2%  Det(K=100% T=0% O=25%)  FPR=100.0%
+    R10 [burn-in] Acc=97.3%  Det(K=100% T=25% O=0%)  FPR=100.0%
+    R20 [ATTACK] Acc=96.2%  Det(K=100% T=50% O=0%)  FPR=100.0%
+    R21 [ATTACK] Acc=96.2%  Det(K=100% T=75% O=0%)  FPR=100.0%
+    R30 [ATTACK] Acc=97.1%  Det(K=100% T=100% O=0%)  FPR=100.0%
+    R40 [ATTACK] Acc=96.3%  Det(K=100% T=100% O=0%)  FPR=100.0%
+    R50 [ATTACK] Acc=96.3%  Det(K=100% T=100% O=0%)  FPR=100.0%
+
+  Detection latency (rounds after activation):
+    Outlier     : Never rounds
+    Trust       : 0 rounds
+    Kappa       : 0 rounds
+    Combined    : 0 rounds
+  Acc at activation (round 20): 96.2%
+  Acc steady-state (last 5 rounds): 96.4%
+  FPR during burn-in: 100.0%
+
+============================================================
+Saved:
+  results/adaptive_sleeper.csv
+  results/adaptive_mimicry.csv
+  results/adaptive_slowdrift.csv
+  results/adaptive_detection_latency.csv  ← key table
+  results/adaptive_latex.txt              ← paste into paper
+============================================================
+Variant                                   Attack Outlier latency  Trust latency  Kappa latency  Combined latency  Burn-in FPR (%)  Final Acc (%)
+      A  Sleeper (delayed activation, T_burn=20)           Never              0              0                 0            100.0           96.3
+      B Mimicry (gradient-constrained poisoning)           Never              0              0                 0            100.0           96.6
+      C   Slow drift (ramp 5%/round to 40% flip)           Never              0              0                 0            100.0           96.4

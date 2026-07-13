@@ -1,0 +1,28 @@
+fl_base.py loaded successfully.
+aggregators.py loaded successfully.
+Preparing data for sensitivity analysis...
+
+============================================================
+  Dataset : foursquare
+  Desc    : Foursquare NYC check-in dataset (Yang et al. 2014)
+  Samples : 80,000
+============================================================
+
+[foursquare] Loading real data from: ./data/foursquare/dataset_TSMC2014_NYC.txt
+  Format: TSMC2014 | Raw check-ins: 227,428
+  Building trip pairs from check-in sequences...
+  Trip pairs   : 80,000
+  Fraud rate   : 12.6%
+  Lat range    : [40.551, 40.988]
+  Lon range    : [-74.271, -73.684]
+
+[1/3] Sweeping τ (outlier threshold)...
+  τ=1.0  Acc=90.2%  F1=34.2%
+  τ=1.5  Acc=90.3%  F1=32.8%
+  τ=2.0  Acc=90.5%  F1=31.0% ← default
+  τ=2.5  Acc=90.2%  F1=28.6%
+  τ=3.0  Acc=90.1%  F1=26.7%
+Traceback (most recent call last):
+  File "/home/mujibur/development/byzantine-FL/experiment2_sensitivity.py", line 131, in <module>
+    pd.DataFrame(tau_rows).to_csv(tag('sensitivity_tau.csv'), index=False)
+TypeError: 'str' object is not callable

@@ -1,0 +1,18 @@
+\begin{table}[htbp]
+\centering
+\scriptsize
+\caption{Per-Layer Detection Analysis: F1-Score (\%) and Unique True Positives per Attack Type (20\% Byzantine)}
+\label{tab:layer_analysis}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lcccc|c}
+\toprule
+\textbf{Attack} & \textbf{Outlier} & \textbf{Trust} & \textbf{Kappa} & \textbf{Combined} & \textbf{Kappa-only TPs} \\
+ & F1 (\%) & F1 (\%) & F1 (\%) & F1 (\%) & (missed by L1+L2) \\
+\midrule
+grad-p & 51.9 & 28.3 & 33.3 & \textbf{33.3} & 8 \\
+spf & 0.0 & 28.3 & 33.3 & \textbf{33.3} & 13 \\
+lfp & 0.0 & 28.3 & 33.3 & \textbf{33.3} & 13 \\
+ooa & 8.5 & 28.3 & 33.3 & \textbf{33.3} & 12 \\
+\bottomrule
+\end{tabular}
+\end{table}

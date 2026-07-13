@@ -1,0 +1,6 @@
+fl_base.py loaded successfully.
+aggregators.py loaded successfully.
+Traceback (most recent call last):
+  File "/home/mujibur/development/byzantine-FL/experiment2_sensitivity.py", line 39, in <module>
+    os.makedirs(results_dir(), exist_ok=True)
+NameError: name 'results_dir' is not defined

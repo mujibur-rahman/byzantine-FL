@@ -1,0 +1,5 @@
+Attack,Outlier P,Outlier R,Outlier F1,Trust P,Trust R,Trust F1,Kappa P,Kappa R,Kappa F1,Combined P,Combined R,Combined F1,Kappa unique TP,Trust unique TP,Outlier unique TP
+grad-p,78.6,27.5,40.7,17.9,67.5,28.3,20.0,100.0,33.3,20.0,100.0,33.3,9,0,0
+spf,0.0,0.0,0.0,17.9,67.5,28.3,20.0,100.0,33.3,20.0,100.0,33.3,13,0,0
+lfp,0.0,0.0,0.0,17.9,67.5,28.3,20.0,100.0,33.3,20.0,100.0,33.3,13,0,0
+ooa,0.0,0.0,0.0,17.9,67.5,28.3,20.0,100.0,33.3,20.0,100.0,33.3,13,0,0

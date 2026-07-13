@@ -1,0 +1,98 @@
+fl_base.py loaded successfully.
+Preparing data for adaptive adversary experiments...
+
+============================================================
+  Dataset : yelp
+  Desc    : Yelp Open Dataset — business locations and check-ins
+  Samples : 80,000
+============================================================
+
+[yelp] ⚠ Real data not found. Using synthetic Yelp-style data.
+  To use real data:
+  1. Download from: https://business.yelp.com/data/resources/open-dataset/
+  2. Extract JSON files to ~/data/yelp/
+  3. Files needed:
+     ~/data/yelp/yelp_academic_dataset_business.json
+     ~/data/yelp/yelp_academic_dataset_checkin.json
+
+[yelp] Synthetic data generated:
+  Records    : 80,000
+  Fraud rate : 13.0%
+  Las Vegas   : 28,053 records
+  Phoenix     : 15,959 records
+  Toronto     : 12,082 records
+  Charlotte   : 12,014 records
+  Pittsburgh  : 11,892 records
+
+============================================================
+  A: Sleeper (delayed activation, T_burn=20)
+============================================================
+    R00 [burn-in] Acc=92.5%  Det(K=100% T=0% O=0%)  FPR=100.0%
+    R10 [burn-in] Acc=95.0%  Det(K=100% T=25% O=0%)  FPR=100.0%
+    R20 [ATTACK] Acc=95.0%  Det(K=100% T=50% O=0%)  FPR=100.0%
+    R21 [ATTACK] Acc=94.5%  Det(K=100% T=75% O=0%)  FPR=100.0%
+    R30 [ATTACK] Acc=95.2%  Det(K=100% T=100% O=0%)  FPR=100.0%
+    R40 [ATTACK] Acc=94.2%  Det(K=100% T=100% O=0%)  FPR=100.0%
+    R50 [ATTACK] Acc=94.2%  Det(K=100% T=100% O=0%)  FPR=100.0%
+
+  Detection latency (rounds after activation):
+    Outlier     : Never rounds
+    Trust       : 0 rounds
+    Kappa       : 0 rounds
+    Combined    : 0 rounds
+  Acc at activation (round 20): 95.0%
+  Acc steady-state (last 5 rounds): 94.2%
+  FPR during burn-in: 100.0%
+
+============================================================
+  B: Mimicry (gradient-constrained poisoning)
+============================================================
+    R00 [burn-in] Acc=92.5%  Det(K=100% T=0% O=0%)  FPR=100.0%
+    R10 [burn-in] Acc=95.0%  Det(K=100% T=25% O=0%)  FPR=100.0%
+    R20 [ATTACK] Acc=94.9%  Det(K=100% T=50% O=0%)  FPR=100.0%
+    R21 [ATTACK] Acc=94.3%  Det(K=100% T=75% O=0%)  FPR=100.0%
+    R30 [ATTACK] Acc=94.5%  Det(K=100% T=100% O=0%)  FPR=100.0%
+    R40 [ATTACK] Acc=93.2%  Det(K=100% T=100% O=0%)  FPR=100.0%
+    R50 [ATTACK] Acc=93.2%  Det(K=100% T=100% O=0%)  FPR=100.0%
+
+  Detection latency (rounds after activation):
+    Outlier     : Never rounds
+    Trust       : 0 rounds
+    Kappa       : 0 rounds
+    Combined    : 0 rounds
+  Acc at activation (round 20): 94.9%
+  Acc steady-state (last 5 rounds): 93.2%
+  FPR during burn-in: 100.0%
+
+============================================================
+  C: Slow drift (ramp 5%/round to 40% flip)
+============================================================
+    R00 [burn-in] Acc=92.3%  Det(K=100% T=0% O=0%)  FPR=100.0%
+    R10 [burn-in] Acc=95.0%  Det(K=100% T=25% O=0%)  FPR=100.0%
+    R20 [ATTACK] Acc=94.8%  Det(K=100% T=50% O=25%)  FPR=100.0%
+    R21 [ATTACK] Acc=94.3%  Det(K=100% T=75% O=0%)  FPR=100.0%
+    R30 [ATTACK] Acc=95.0%  Det(K=100% T=100% O=0%)  FPR=100.0%
+    R40 [ATTACK] Acc=93.9%  Det(K=100% T=100% O=0%)  FPR=100.0%
+    R50 [ATTACK] Acc=93.9%  Det(K=100% T=100% O=0%)  FPR=100.0%
+
+  Detection latency (rounds after activation):
+    Outlier     : Never rounds
+    Trust       : 0 rounds
+    Kappa       : 0 rounds
+    Combined    : 0 rounds
+  Acc at activation (round 20): 94.85%
+  Acc steady-state (last 5 rounds): 94.0%
+  FPR during burn-in: 100.0%
+
+============================================================
+Saved:
+  results/adaptive_sleeper.csv
+  results/adaptive_mimicry.csv
+  results/adaptive_slowdrift.csv
+  results/adaptive_detection_latency.csv  ← key table
+  results/adaptive_latex.txt              ← paste into paper
+============================================================
+Variant                                   Attack Outlier latency  Trust latency  Kappa latency  Combined latency  Burn-in FPR (%)  Final Acc (%)
+      A  Sleeper (delayed activation, T_burn=20)           Never              0              0                 0            100.0           94.2
+      B Mimicry (gradient-constrained poisoning)           Never              0              0                 0            100.0           93.2
+      C   Slow drift (ramp 5%/round to 40% flip)           Never              0              0                 0            100.0           94.0

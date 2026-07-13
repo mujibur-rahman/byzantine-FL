@@ -1,0 +1,89 @@
+fl_base.py loaded successfully.
+Preparing data for adaptive adversary experiments...
+
+============================================================
+  Dataset : foursquare
+  Desc    : Foursquare NYC check-in dataset (Yang et al. 2014)
+  Samples : 80,000
+============================================================
+
+[foursquare] Loading real data from: ./data/foursquare/dataset_TSMC2014_NYC.txt
+  Format: TSMC2014 | Raw check-ins: 227,428
+  Building trip pairs from check-in sequences...
+  Trip pairs   : 80,000
+  Fraud rate   : 12.6%
+  Lat range    : [40.551, 40.988]
+  Lon range    : [-74.271, -73.684]
+
+============================================================
+  A: Sleeper (delayed activation, T_burn=20)
+============================================================
+    R00 [burn-in] Acc=90.1%  Det(K=100% T=0% O=0%)  FPR=100.0%
+    R10 [burn-in] Acc=90.2%  Det(K=100% T=25% O=0%)  FPR=100.0%
+    R20 [ATTACK] Acc=90.3%  Det(K=100% T=50% O=0%)  FPR=100.0%
+    R21 [ATTACK] Acc=90.3%  Det(K=100% T=75% O=0%)  FPR=100.0%
+    R30 [ATTACK] Acc=90.4%  Det(K=100% T=100% O=0%)  FPR=100.0%
+    R40 [ATTACK] Acc=90.5%  Det(K=100% T=100% O=0%)  FPR=100.0%
+    R50 [ATTACK] Acc=90.5%  Det(K=100% T=100% O=0%)  FPR=100.0%
+
+  Detection latency (rounds after activation):
+    Outlier     : Never rounds
+    Trust       : 0 rounds
+    Kappa       : 0 rounds
+    Combined    : 0 rounds
+  Acc at activation (round 20): 90.3%
+  Acc steady-state (last 5 rounds): 90.3%
+  FPR during burn-in: 100.0%
+
+============================================================
+  B: Mimicry (gradient-constrained poisoning)
+============================================================
+    R00 [burn-in] Acc=90.0%  Det(K=100% T=0% O=0%)  FPR=100.0%
+    R10 [burn-in] Acc=90.1%  Det(K=100% T=25% O=0%)  FPR=100.0%
+    R20 [ATTACK] Acc=90.3%  Det(K=100% T=50% O=0%)  FPR=100.0%
+    R21 [ATTACK] Acc=90.3%  Det(K=100% T=75% O=0%)  FPR=100.0%
+    R30 [ATTACK] Acc=90.3%  Det(K=100% T=100% O=0%)  FPR=100.0%
+    R40 [ATTACK] Acc=90.5%  Det(K=100% T=100% O=0%)  FPR=100.0%
+    R50 [ATTACK] Acc=90.5%  Det(K=100% T=100% O=0%)  FPR=100.0%
+
+  Detection latency (rounds after activation):
+    Outlier     : Never rounds
+    Trust       : 0 rounds
+    Kappa       : 0 rounds
+    Combined    : 0 rounds
+  Acc at activation (round 20): 90.3%
+  Acc steady-state (last 5 rounds): 90.4%
+  FPR during burn-in: 100.0%
+
+============================================================
+  C: Slow drift (ramp 5%/round to 40% flip)
+============================================================
+    R00 [burn-in] Acc=90.1%  Det(K=100% T=0% O=0%)  FPR=100.0%
+    R10 [burn-in] Acc=90.2%  Det(K=100% T=25% O=0%)  FPR=100.0%
+    R20 [ATTACK] Acc=90.3%  Det(K=100% T=50% O=0%)  FPR=100.0%
+    R21 [ATTACK] Acc=90.3%  Det(K=100% T=75% O=0%)  FPR=100.0%
+    R30 [ATTACK] Acc=90.4%  Det(K=100% T=100% O=0%)  FPR=100.0%
+    R40 [ATTACK] Acc=90.5%  Det(K=100% T=100% O=0%)  FPR=100.0%
+    R50 [ATTACK] Acc=90.5%  Det(K=100% T=100% O=0%)  FPR=100.0%
+
+  Detection latency (rounds after activation):
+    Outlier     : Never rounds
+    Trust       : 0 rounds
+    Kappa       : 0 rounds
+    Combined    : 0 rounds
+  Acc at activation (round 20): 90.3%
+  Acc steady-state (last 5 rounds): 90.5%
+  FPR during burn-in: 100.0%
+
+============================================================
+Saved:
+  results/adaptive_sleeper.csv
+  results/adaptive_mimicry.csv
+  results/adaptive_slowdrift.csv
+  results/adaptive_detection_latency.csv  ← key table
+  results/adaptive_latex.txt              ← paste into paper
+============================================================
+Variant                                   Attack Outlier latency  Trust latency  Kappa latency  Combined latency  Burn-in FPR (%)  Final Acc (%)
+      A  Sleeper (delayed activation, T_burn=20)           Never              0              0                 0            100.0           90.3
+      B Mimicry (gradient-constrained poisoning)           Never              0              0                 0            100.0           90.4
+      C   Slow drift (ramp 5%/round to 40% flip)           Never              0              0                 0            100.0           90.4

@@ -1,0 +1,42 @@
+fl_base.py loaded successfully.
+aggregators.py loaded successfully.
+Preparing data for overhead measurement...
+
+  n_clients = 20
+    FedAvg         :    0.04 ± 0.00 ms  (1.0× FedAvg)  [O(nd)]
+    Multi-Krum     :    0.27 ± 0.01 ms  (7.0× FedAvg)  [O(n²d)]
+    TrimmedMean    :    0.03 ± 0.00 ms  (0.8× FedAvg)  [O(nd log n)]
+    Bulyan         :    0.27 ± 0.01 ms  (7.0× FedAvg)  [O(n²d)]
+    RFVIR          :    0.22 ± 0.02 ms  (5.7× FedAvg)  [O(nd)]
+    FLAME          :    5.26 ± 0.05 ms  (136.4× FedAvg)  [O(nd + n² )]
+    Ours           :    6.00 ± 0.58 ms  (155.8× FedAvg)  [O(nd + n·m)]
+
+  n_clients = 50
+    FedAvg         :    0.08 ± 0.00 ms  (1.0× FedAvg)  [O(nd)]
+    Multi-Krum     :    0.72 ± 0.01 ms  (9.1× FedAvg)  [O(n²d)]
+    TrimmedMean    :    0.05 ± 0.00 ms  (0.6× FedAvg)  [O(nd log n)]
+    Bulyan         :    0.72 ± 0.01 ms  (9.1× FedAvg)  [O(n²d)]
+    RFVIR          :    0.35 ± 0.01 ms  (4.5× FedAvg)  [O(nd)]
+    FLAME          :    6.84 ± 0.30 ms  (86.7× FedAvg)  [O(nd + n² )]
+    Ours           :   12.94 ± 0.50 ms  (164.1× FedAvg)  [O(nd + n·m)]
+
+  n_clients = 100
+    FedAvg         :    0.14 ± 0.00 ms  (1.0× FedAvg)  [O(nd)]
+    Multi-Krum     :    1.56 ± 0.02 ms  (11.4× FedAvg)  [O(n²d)]
+    TrimmedMean    :    0.09 ± 0.00 ms  (0.6× FedAvg)  [O(nd log n)]
+    Bulyan         :    1.54 ± 0.01 ms  (11.2× FedAvg)  [O(n²d)]
+    RFVIR          :    0.56 ± 0.02 ms  (4.1× FedAvg)  [O(nd)]
+    FLAME          :    8.68 ± 0.51 ms  (63.5× FedAvg)  [O(nd + n² )]
+    Ours           :   25.60 ± 1.17 ms  (187.4× FedAvg)  [O(nd + n·m)]
+
+  n_clients = 200
+    FedAvg         :    0.26 ± 0.00 ms  (1.0× FedAvg)  [O(nd)]
+    Multi-Krum     :    4.03 ± 0.09 ms  (15.4× FedAvg)  [O(n²d)]
+    TrimmedMean    :    0.17 ± 0.03 ms  (0.6× FedAvg)  [O(nd log n)]
+    Bulyan         :    3.98 ± 0.07 ms  (15.2× FedAvg)  [O(n²d)]
+    RFVIR          :    1.13 ± 0.26 ms  (4.3× FedAvg)  [O(nd)]
+    FLAME          :   10.42 ± 0.07 ms  (39.7× FedAvg)  [O(nd + n² )]
+    Ours           :   54.11 ± 5.01 ms  (206.0× FedAvg)  [O(nd + n·m)]
+
+Saved results/overhead.csv and overhead_latex.txt
+[Copy overhead_latex.txt content into Section V of the LaTeX file]

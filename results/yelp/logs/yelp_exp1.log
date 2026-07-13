@@ -1,0 +1,37 @@
+fl_base.py loaded successfully.
+aggregators.py loaded successfully.
+
+============================================================
+  Dataset : yelp
+  Desc    : Yelp Open Dataset — business locations and check-ins
+  Samples : 80,000
+============================================================
+
+[yelp] ⚠ Real data not found. Using synthetic Yelp-style data.
+  To use real data:
+  1. Download from: https://business.yelp.com/data/resources/open-dataset/
+  2. Extract JSON files to ~/data/yelp/
+  3. Files needed:
+     ~/data/yelp/yelp_academic_dataset_business.json
+     ~/data/yelp/yelp_academic_dataset_checkin.json
+
+[yelp] Synthetic data generated:
+  Records    : 80,000
+  Fraud rate : 13.0%
+  Las Vegas   : 28,053 records
+  Phoenix     : 15,959 records
+  Toronto     : 12,082 records
+  Charlotte   : 12,014 records
+  Pittsburgh  : 11,892 records
+
+Running 7 methods × 4 attacks × 50 rounds each...
+Byzantine ratio: 20%  |  Non-IID alpha: 0.5  |  Clients/round: 20
+
+Traceback (most recent call last):
+  File "/home/mujibur/development/byzantine-FL/experiment1_baselines.py", line 165, in <module>
+    final_acc, acc_curve = run_experiment(method, attack)
+  File "/home/mujibur/development/byzantine-FL/experiment1_baselines.py", line 127, in run_experiment
+    agg = fedavg(updates)
+  File "/home/mujibur/development/byzantine-FL/aggregators.py", line 15, in fedavg
+    return sum(w * u for w, u in zip(weights, updates))
+ValueError: operands could not be broadcast together with shapes (11,) (2,) 

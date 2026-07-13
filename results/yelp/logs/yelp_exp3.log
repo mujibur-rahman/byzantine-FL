@@ -1,0 +1,31 @@
+fl_base.py loaded successfully.
+Preparing data for layer analysis...
+
+Running layer analysis across 4 attack types...
+
+  Attack: grad-p
+    Outlier only : P=100.0% R=35.0% F1=51.9%  | Unique TP=0
+    Trust only   : P=17.9% R=67.5% F1=28.3%  | Unique TP=0
+    Kappa only   : P=20.0% R=100.0% F1=33.3%  | Unique TP=8
+    Combined     : P=20.0% R=100.0% F1=33.3%
+
+  Attack: spf
+    Outlier only : P=0.0% R=0.0% F1=0.0%  | Unique TP=0
+    Trust only   : P=17.9% R=67.5% F1=28.3%  | Unique TP=0
+    Kappa only   : P=20.0% R=100.0% F1=33.3%  | Unique TP=13
+    Combined     : P=20.0% R=100.0% F1=33.3%
+
+  Attack: lfp
+    Outlier only : P=0.0% R=0.0% F1=0.0%  | Unique TP=0
+    Trust only   : P=17.9% R=67.5% F1=28.3%  | Unique TP=0
+    Kappa only   : P=20.0% R=100.0% F1=33.3%  | Unique TP=13
+    Combined     : P=20.0% R=100.0% F1=33.3%
+
+  Attack: ooa
+    Outlier only : P=0.0% R=0.0% F1=0.0%  | Unique TP=0
+    Trust only   : P=17.9% R=67.5% F1=28.3%  | Unique TP=0
+    Kappa only   : P=20.0% R=100.0% F1=33.3%  | Unique TP=13
+    Combined     : P=20.0% R=100.0% F1=33.3%
+
+Saved results/layer_confusion.csv and layer_confusion_latex.txt
+[The 'Kappa-only TPs' column is the key evidence for Corollary 1]

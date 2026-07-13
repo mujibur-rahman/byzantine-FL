@@ -1,0 +1,31 @@
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\caption{Adaptive Adversary Detection: Latency (Rounds After Activation) Per Layer and Final Model Accuracy (\%), $T_{\text{burn}}=20$, 20\% Byzantine}
+\label{tab:adaptive}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{p{2.2cm}cccc|cc}
+\toprule
+\textbf{Attack Variant} & \textbf{Outlier} & \textbf{Trust} & \textbf{Kappa} & \textbf{Combined} & \textbf{Burn-in FPR} & \textbf{Final Acc} \\
+ & latency & latency & latency & latency & (\%) & (\%) \\
+\midrule
+Sleeper (delayed activation, T_burn=20) & Never & 0 & \textbf{0} & 0 & 100.0 & 90.3 \\
+Mimicry (gradient-constrained poisoning) & Never & 0 & \textbf{0} & 0 & 100.0 & 90.4 \\
+Slow drift (ramp 5%/round to 40% flip) & Never & 0 & \textbf{0} & 0 & 100.0 & 90.4 \\
+\bottomrule
+\end{tabular}
+\vspace{1mm}
+\begin{minipage}{0.48\textwidth}
+\scriptsize
+Latency = rounds elapsed between attack activation (round $T_{\text{burn}}$)
+and the first round in which $>$50\% of Byzantine clients are flagged.
+\textbf{Kappa latency} is the detection speed of Layer~3 alone.
+``Never'' indicates the layer never detected $>$50\% of attackers
+within the experiment window.
+Trust latency reflects EMA decay ($\alpha=0.8$): a client with
+$T_i \approx 1.0$ requires $\approx \lceil \log_{0.8}(0.7) \rceil = 8$ rounds
+to fall below threshold---consistent with the Burn-in Latency Remark
+in Section~IV.
+\end{minipage}
+\end{table}

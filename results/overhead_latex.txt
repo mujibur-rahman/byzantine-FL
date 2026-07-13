@@ -1,0 +1,28 @@
+\begin{table}[htbp]
+\centering
+\scriptsize
+\caption{Computational Overhead per Aggregation Round ($n=100$ clients, $d=10$ parameters, $|\mathcal{D}_{val}|=2000$)}
+\label{tab:overhead}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Method} & \textbf{Avg Time (ms)} & \textbf{Overhead (×FedAvg)} & \textbf{Complexity} \\
+\midrule
+FedAvg & 0.14 & 1.0 & \texttt{O(nd)} \\
+Multi-Krum & 1.56 & 11.41 & \texttt{O(n²d)} \\
+TrimmedMean & 0.09 & 0.63 & \texttt{O(nd log n)} \\
+Bulyan & 1.54 & 11.24 & \texttt{O(n²d)} \\
+RFVIR & 0.56 & 4.07 & \texttt{O(nd)} \\
+FLAME & 8.68 & 63.54 & \texttt{O(nd + n² )} \\
+\textbf{Ours} & 25.6 & 187.42 & \texttt{O(nd + n·m)} \\
+\bottomrule
+\end{tabular}
+\vspace{1mm}
+\begin{minipage}{0.45\textwidth}
+\scriptsize
+$n$: clients per round; $d$: model parameter dimension;
+$m$: validation set size. Our method's additional cost over FedAvg
+arises from the Kappa forward pass on $\mathcal{D}_{val}$,
+which is $O(nm)$ and runs on the server only.
+\end{minipage}
+\end{table}

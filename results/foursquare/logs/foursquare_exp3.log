@@ -1,0 +1,45 @@
+fl_base.py loaded successfully.
+Preparing data for layer analysis...
+
+============================================================
+  Dataset : foursquare
+  Desc    : Foursquare NYC check-in dataset (Yang et al. 2014)
+  Samples : 80,000
+============================================================
+
+[foursquare] Loading real data from: ./data/foursquare/dataset_TSMC2014_NYC.txt
+  Format: TSMC2014 | Raw check-ins: 227,428
+  Building trip pairs from check-in sequences...
+  Trip pairs   : 80,000
+  Fraud rate   : 12.6%
+  Lat range    : [40.551, 40.988]
+  Lon range    : [-74.271, -73.684]
+
+Running layer analysis across 4 attack types...
+
+  Attack: grad-p
+    Outlier only : P=78.6% R=27.5% F1=40.7%  | Unique TP=0
+    Trust only   : P=17.9% R=67.5% F1=28.3%  | Unique TP=0
+    Kappa only   : P=20.0% R=100.0% F1=33.3%  | Unique TP=9
+    Combined     : P=20.0% R=100.0% F1=33.3%
+
+  Attack: spf
+    Outlier only : P=0.0% R=0.0% F1=0.0%  | Unique TP=0
+    Trust only   : P=17.9% R=67.5% F1=28.3%  | Unique TP=0
+    Kappa only   : P=20.0% R=100.0% F1=33.3%  | Unique TP=13
+    Combined     : P=20.0% R=100.0% F1=33.3%
+
+  Attack: lfp
+    Outlier only : P=0.0% R=0.0% F1=0.0%  | Unique TP=0
+    Trust only   : P=17.9% R=67.5% F1=28.3%  | Unique TP=0
+    Kappa only   : P=20.0% R=100.0% F1=33.3%  | Unique TP=13
+    Combined     : P=20.0% R=100.0% F1=33.3%
+
+  Attack: ooa
+    Outlier only : P=0.0% R=0.0% F1=0.0%  | Unique TP=0
+    Trust only   : P=17.9% R=67.5% F1=28.3%  | Unique TP=0
+    Kappa only   : P=20.0% R=100.0% F1=33.3%  | Unique TP=13
+    Combined     : P=20.0% R=100.0% F1=33.3%
+
+Saved results/layer_confusion.csv and layer_confusion_latex.txt
+[The 'Kappa-only TPs' column is the key evidence for Corollary 1]
