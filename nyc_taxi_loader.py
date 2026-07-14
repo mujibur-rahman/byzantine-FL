@@ -269,11 +269,11 @@ def load_nyc_taxi(parquet_path=None, zone_lookup_path=None,
             print(f"  ✗ Failed to load parquet: {e}")
             print(f"  → Falling back to synthetic NYC Taxi data")
 
-    # ── Synthetic fallback ────────────────────────────────────────────────
-    print(f"\n[nyc-taxi] ⚠ Real data not found. Using synthetic NYC Taxi data.")
-    print(f"  To use real data:")
-    print(f"  1. Download from https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page")
-    print(f"  2. Pass parquet_path='path/to/fhvhv_tripdata_2025-01.parquet'")
+            # ── Synthetic fallback ────────────────────────────────────────────────
+            print(f"\n[nyc-taxi] ⚠ Real data not found. Using synthetic NYC Taxi data.")
+            print(f"  To use real data:")
+            print(f"  1. Download from https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page")
+            print(f"  2. Pass parquet_path='path/to/fhvhv_tripdata_2025-01.parquet'")
 
     from fl_base import generate_sc_dataset
     return generate_sc_dataset(n_samples, fraud_rate=0.15, seed=seed)

@@ -46,10 +46,10 @@ DATASET_REGISTRY = {
 
     'nyc-taxi': {
         'description':  'NYC TLC High-Volume FHV trips (2025)',
-        #'real_path':    os.path.expanduser(
-        #                    '~/data/nyc-taxi/fhvhv_tripdata_2025-01.parquet'),
-        'real_path':     os.path.expanduser(
-                            './data/nyc-taxi/yellow_tripdata_2015-01.csv'),
+        'real_path':    os.path.expanduser(
+                            '~/data/nyc-taxi/fhvhv_tripdata_2025-01.parquet'),
+        #'real_path':     os.path.expanduser(
+        #                    './data/nyc-taxi/yellow_tripdata_2015-01.csv'),
         'aux_path':     os.path.expanduser(
                             '~/data/nyc-taxi/yellow_tripdata_2015-01.csv'),
                             #'~/data/nyc-taxi/taxi_zone_lookup.csv'),

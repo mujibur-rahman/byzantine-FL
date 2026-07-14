@@ -8,20 +8,39 @@ Preparing data for adaptive adversary experiments...
 ============================================================
 
 [nyc-taxi] Loading real TLC data from: ./data/nyc-taxi/yellow_tripdata_2015-01.csv
-  ✗ Failed to load parquet: Could not open Parquet input source '<Buffer>': Parquet magic bytes not found in footer. Either the file is corrupted or this is not a parquet file.
-  → Falling back to synthetic NYC Taxi data
-
-[nyc-taxi] ⚠ Real data not found. Using synthetic NYC Taxi data.
-  To use real data:
-  1. Download from https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page
-  2. Pass parquet_path='path/to/fhvhv_tripdata_2025-01.parquet'
-
-============================================================
-  A: Sleeper (delayed activation, T_burn=20)
-============================================================
 Traceback (most recent call last):
-  File "/home/mujibur/development/byzantine-FL/experiment5_adaptive.py", line 296, in <module>
-    rdf, cdf = run_adaptive(variant, N_ROUNDS, T_BURN)
-  File "/home/mujibur/development/byzantine-FL/experiment5_adaptive.py", line 213, in run_adaptive
-    agg_update += w * update
-ValueError: operands could not be broadcast together with shapes (11,) (17345,) (11,) 
+  File "D:\experiment\byzantine-FL\nyc_taxi_loader.py", line 157, in load_nyc_taxi
+    df = pd.read_parquet(parquet_path)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mujib\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\pandas\io\parquet.py", line 669, in read_parquet
+    return impl.read(
+           ^^^^^^^^^^
+  File "C:\Users\mujib\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\pandas\io\parquet.py", line 265, in read
+    pa_table = self.api.parquet.read_table(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mujib\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\pyarrow\parquet\core.py", line 1843, in read_table
+    dataset = ParquetDataset(
+              ^^^^^^^^^^^^^^^
+  File "C:\Users\mujib\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\LocalCache\local-packages\Python311\site-packages\pyarrow\parquet\core.py", line 1413, in __init__
+    [fragment], schema=schema or fragment.physical_schema,
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pyarrow\\_dataset.pyx", line 1473, in pyarrow._dataset.Fragment.physical_schema.__get__
+  File "pyarrow\\error.pxi", line 155, in pyarrow.lib.pyarrow_internal_check_status
+  File "pyarrow\\error.pxi", line 92, in pyarrow.lib.check_status
+pyarrow.lib.ArrowInvalid: Could not open Parquet input source '<Buffer>': Parquet magic bytes not found in footer. Either the file is corrupted or this is not a parquet file.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\experiment\byzantine-FL\experiment5_adaptive.py", line 75, in <module>
+    X, y = get_dataset(seed=SEED)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\experiment\byzantine-FL\dataset_config.py", line 118, in get_dataset
+    return load_nyc_taxi(
+           ^^^^^^^^^^^^^^
+  File "D:\experiment\byzantine-FL\nyc_taxi_loader.py", line 269, in load_nyc_taxi
+    print(f"  \u2717 Failed to load parquet: {e}")
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2717' in position 2: character maps to <undefined>

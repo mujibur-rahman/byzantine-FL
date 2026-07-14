@@ -6,15 +6,15 @@
 \renewcommand{\arraystretch}{1.2}
 \begin{tabular}{lccc}
 \toprule
-\textbf{Method} & \textbf{Avg Time (ms)} & \textbf{Overhead (Ã—FedAvg)} & \textbf{Complexity} \\
+\textbf{Method} & \textbf{Avg Time (ms)} & \textbf{Overhead (×FedAvg)} & \textbf{Complexity} \\
 \midrule
-FedAvg & 0.14 & 1.0 & \texttt{O(nd)} \\
-Multi-Krum & 1.69 & 12.24 & \texttt{O(nÂ²d)} \\
-TrimmedMean & 0.09 & 0.66 & \texttt{O(nd log n)} \\
-Bulyan & 1.61 & 11.64 & \texttt{O(nÂ²d)} \\
-RFVIR & 0.58 & 4.18 & \texttt{O(nd)} \\
-FLAME & 8.79 & 63.66 & \texttt{O(nd + nÂ² )} \\
-\textbf{Ours} & 32.24 & 233.41 & \texttt{O(nd + nÂ·m)} \\
+FedAvg & 0.29 & 1.0 & \texttt{O(nd)} \\
+Multi-Krum & 2.35 & 8.08 & \texttt{O(n²d)} \\
+TrimmedMean & 0.1 & 0.34 & \texttt{O(nd log n)} \\
+Bulyan & 2.31 & 7.94 & \texttt{O(n²d)} \\
+RFVIR & 0.94 & 3.24 & \texttt{O(nd)} \\
+FLAME & 40.32 & 138.63 & \texttt{O(nd + n² )} \\
+\textbf{Ours} & 63.83 & 219.45 & \texttt{O(nd + n·m)} \\
 \bottomrule
 \end{tabular}
 \vspace{1mm}
