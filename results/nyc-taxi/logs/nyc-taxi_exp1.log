@@ -1,0 +1,155 @@
+fl_base.py loaded successfully.
+aggregators.py loaded successfully.
+aggregators.py loaded successfully.
+
+[nyc-taxi] Baseline Comparison Experiment
+
+============================================================
+  Dataset : nyc-taxi
+  Desc    : NYC TLC High-Volume FHV trips (2025)
+  Samples : 100,000
+============================================================
+
+[nyc-taxi] Loading real TLC data from: ./data/nyc-taxi/yellow_tripdata_2015-01.csv
+  ✗ Failed to load parquet: Could not open Parquet input source '<Buffer>': Parquet magic bytes not found in footer. Either the file is corrupted or this is not a parquet file.
+  → Falling back to synthetic NYC Taxi data
+
+[nyc-taxi] ⚠ Real data not found. Using synthetic NYC Taxi data.
+  To use real data:
+  1. Download from https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page
+  2. Pass parquet_path='path/to/fhvhv_tripdata_2025-01.parquet'
+
+Running no-attack baseline (Ours, clean data)...
+  Federation: 100 clients (0 Byzantine [None], 100 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  No-attack accuracy: 99.2%
+
+Running 7 methods × 4 attacks × 50 rounds each...
+Dataset: nyc-taxi | Byzantine: 20% | Non-IID α: 0.5
+
+  Federation: 100 clients (20 Byzantine [grad-p], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  FedAvg             | grad-p  | Acc= 91.2%  F1= 56.0%  [116.0s]
+  Federation: 100 clients (20 Byzantine [spf], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  FedAvg             | spf     | Acc= 98.5%  F1= 94.6%  [116.5s]
+  Federation: 100 clients (20 Byzantine [lfp], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  FedAvg             | lfp     | Acc= 99.0%  F1= 96.5%  [115.2s]
+  Federation: 100 clients (20 Byzantine [ooa], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  FedAvg             | ooa     | Acc= 99.0%  F1= 96.5%  [118.8s]
+  Federation: 100 clients (20 Byzantine [grad-p], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  Multi-Krum         | grad-p  | Acc= 98.7%  F1= 95.6%  [117.8s]
+  Federation: 100 clients (20 Byzantine [spf], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  Multi-Krum         | spf     | Acc= 98.7%  F1= 95.5%  [114.9s]
+  Federation: 100 clients (20 Byzantine [lfp], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  Multi-Krum         | lfp     | Acc= 98.6%  F1= 95.2%  [115.2s]
+  Federation: 100 clients (20 Byzantine [ooa], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  Multi-Krum         | ooa     | Acc= 98.6%  F1= 95.2%  [115.0s]
+  Federation: 100 clients (20 Byzantine [grad-p], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  TrimmedMean        | grad-p  | Acc= 98.7%  F1= 95.4%  [113.7s]
+  Federation: 100 clients (20 Byzantine [spf], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  TrimmedMean        | spf     | Acc= 98.8%  F1= 95.7%  [114.3s]
+  Federation: 100 clients (20 Byzantine [lfp], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  TrimmedMean        | lfp     | Acc= 99.0%  F1= 96.5%  [113.3s]
+  Federation: 100 clients (20 Byzantine [ooa], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  TrimmedMean        | ooa     | Acc= 98.8%  F1= 95.9%  [114.4s]
+  Federation: 100 clients (20 Byzantine [grad-p], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  Bulyan             | grad-p  | Acc= 99.0%  F1= 96.3%  [114.4s]
+  Federation: 100 clients (20 Byzantine [spf], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  Bulyan             | spf     | Acc= 98.8%  F1= 95.8%  [115.4s]
+  Federation: 100 clients (20 Byzantine [lfp], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  Bulyan             | lfp     | Acc= 98.2%  F1= 93.6%  [114.9s]
+  Federation: 100 clients (20 Byzantine [ooa], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  Bulyan             | ooa     | Acc= 98.6%  F1= 95.2%  [114.6s]
+  Federation: 100 clients (20 Byzantine [grad-p], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  RFVIR              | grad-p  | Acc= 80.1%  F1= 58.9%  [114.1s]
+  Federation: 100 clients (20 Byzantine [spf], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  RFVIR              | spf     | Acc= 98.9%  F1= 96.0%  [114.5s]
+  Federation: 100 clients (20 Byzantine [lfp], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  RFVIR              | lfp     | Acc= 98.9%  F1= 96.1%  [115.1s]
+  Federation: 100 clients (20 Byzantine [ooa], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  RFVIR              | ooa     | Acc= 98.5%  F1= 94.3%  [115.0s]
+  Federation: 100 clients (20 Byzantine [grad-p], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  FLAME              | grad-p  | Acc= 99.0%  F1= 96.4%  [120.8s]
+  Federation: 100 clients (20 Byzantine [spf], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  FLAME              | spf     | Acc= 99.0%  F1= 96.3%  [120.7s]
+  Federation: 100 clients (20 Byzantine [lfp], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  FLAME              | lfp     | Acc= 98.9%  F1= 96.1%  [120.8s]
+  Federation: 100 clients (20 Byzantine [ooa], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  FLAME              | ooa     | Acc= 99.0%  F1= 96.6%  [120.5s]
+  Federation: 100 clients (20 Byzantine [grad-p], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  Ours               | grad-p  | Acc= 98.5%  F1= 94.3%  [122.5s]
+  Federation: 100 clients (20 Byzantine [spf], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  Ours               | spf     | Acc= 98.5%  F1= 94.9%  [124.0s]
+  Federation: 100 clients (20 Byzantine [lfp], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  Ours               | lfp     | Acc= 98.8%  F1= 95.6%  [125.2s]
+  Federation: 100 clients (20 Byzantine [ooa], 80 benign)
+  Model     : FLNeuralNet(10 → 64 → 128 → 64 → 1, params=17,345)
+  Mode      : Sync FL
+  Ours               | ooa     | Acc= 98.9%  F1= 96.1%  [123.8s]
+
+── Results (nyc-taxi) ─────────────────────────────────────
+     Method  grad-p  spf  lfp  ooa  No Attack
+     FedAvg    91.2 98.5 99.0 99.0       99.2
+ Multi-Krum    98.7 98.7 98.6 98.6       99.2
+TrimmedMean    98.7 98.8 99.0 98.8       99.2
+     Bulyan    99.0 98.8 98.2 98.6       99.2
+      RFVIR    80.1 98.9 98.9 98.5       99.2
+      FLAME    99.0 99.0 98.9 99.0       99.2
+       Ours    98.5 98.5 98.8 98.9       99.2
+
+Saved to: results/nyc-taxi/nyc-taxi_table_baselines.csv
+[Copy accuracy values into Table VI in the LaTeX file]

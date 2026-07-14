@@ -22,6 +22,6 @@ Running layer analysis across 4 attack types...
 Traceback (most recent call last):
   File "/home/mujibur/development/byzantine-FL/experiment3_layer_analysis.py", line 186, in <module>
     df = run_layer_analysis(attack)
-  File "/home/mujibur/development/byzantine-FL/experiment3_layer_analysis.py", line 114, in run_layer_analysis
-    dw, db = m.train(Xc, yc, lr=LR, epochs=5, batch_size=32)
-TypeError: cannot unpack non-iterable NoneType object
+  File "/home/mujibur/development/byzantine-FL/experiment3_layer_analysis.py", line 119, in run_layer_analysis
+    update = update + noise
+NameError: name 'noise' is not defined

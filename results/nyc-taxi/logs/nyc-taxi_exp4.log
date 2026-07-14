@@ -1,42 +1,43 @@
 fl_base.py loaded successfully.
 aggregators.py loaded successfully.
+aggregators.py loaded successfully.
 Preparing data for overhead measurement...
 
   n_clients = 20
     FedAvg         :    0.04 ± 0.00 ms  (1.0× FedAvg)  [O(nd)]
-    Multi-Krum     :    0.29 ± 0.02 ms  (7.8× FedAvg)  [O(n²d)]
+    Multi-Krum     :    0.28 ± 0.01 ms  (7.4× FedAvg)  [O(n²d)]
     TrimmedMean    :    0.03 ± 0.00 ms  (0.8× FedAvg)  [O(nd log n)]
-    Bulyan         :    0.28 ± 0.00 ms  (7.6× FedAvg)  [O(n²d)]
-    RFVIR          :    0.22 ± 0.02 ms  (6.1× FedAvg)  [O(nd)]
-    FLAME          :    5.42 ± 0.27 ms  (146.0× FedAvg)  [O(nd + n² )]
-    Ours           :    6.18 ± 0.19 ms  (166.6× FedAvg)  [O(nd + n·m)]
+    Bulyan         :    0.28 ± 0.00 ms  (7.4× FedAvg)  [O(n²d)]
+    RFVIR          :    0.22 ± 0.01 ms  (5.8× FedAvg)  [O(nd)]
+    FLAME          :    5.49 ± 0.38 ms  (144.6× FedAvg)  [O(nd + n² )]
+    Ours           :    6.02 ± 0.09 ms  (158.5× FedAvg)  [O(nd + n·m)]
 
   n_clients = 50
-    FedAvg         :    0.08 ± 0.00 ms  (1.0× FedAvg)  [O(nd)]
-    Multi-Krum     :    0.72 ± 0.01 ms  (9.6× FedAvg)  [O(n²d)]
-    TrimmedMean    :    0.07 ± 0.02 ms  (0.9× FedAvg)  [O(nd log n)]
-    Bulyan         :    0.75 ± 0.02 ms  (10.0× FedAvg)  [O(n²d)]
-    RFVIR          :    0.37 ± 0.01 ms  (4.9× FedAvg)  [O(nd)]
-    FLAME          :    6.62 ± 0.04 ms  (88.0× FedAvg)  [O(nd + n² )]
-    Ours           :   15.08 ± 0.65 ms  (200.5× FedAvg)  [O(nd + n·m)]
+    FedAvg         :    0.07 ± 0.00 ms  (1.0× FedAvg)  [O(nd)]
+    Multi-Krum     :    0.72 ± 0.02 ms  (9.7× FedAvg)  [O(n²d)]
+    TrimmedMean    :    0.05 ± 0.00 ms  (0.7× FedAvg)  [O(nd log n)]
+    Bulyan         :    0.70 ± 0.01 ms  (9.4× FedAvg)  [O(n²d)]
+    RFVIR          :    0.35 ± 0.01 ms  (4.7× FedAvg)  [O(nd)]
+    FLAME          :    6.85 ± 0.16 ms  (92.0× FedAvg)  [O(nd + n² )]
+    Ours           :   14.41 ± 0.66 ms  (193.6× FedAvg)  [O(nd + n·m)]
 
   n_clients = 100
     FedAvg         :    0.14 ± 0.00 ms  (1.0× FedAvg)  [O(nd)]
-    Multi-Krum     :    1.66 ± 0.05 ms  (12.2× FedAvg)  [O(n²d)]
-    TrimmedMean    :    0.09 ± 0.00 ms  (0.6× FedAvg)  [O(nd log n)]
-    Bulyan         :    1.59 ± 0.01 ms  (11.7× FedAvg)  [O(n²d)]
-    RFVIR          :    0.61 ± 0.04 ms  (4.5× FedAvg)  [O(nd)]
-    FLAME          :    8.85 ± 0.42 ms  (65.2× FedAvg)  [O(nd + n² )]
-    Ours           :   29.26 ± 1.28 ms  (215.7× FedAvg)  [O(nd + n·m)]
+    Multi-Krum     :    1.69 ± 0.03 ms  (12.2× FedAvg)  [O(n²d)]
+    TrimmedMean    :    0.09 ± 0.00 ms  (0.7× FedAvg)  [O(nd log n)]
+    Bulyan         :    1.61 ± 0.04 ms  (11.6× FedAvg)  [O(n²d)]
+    RFVIR          :    0.58 ± 0.01 ms  (4.2× FedAvg)  [O(nd)]
+    FLAME          :    8.79 ± 0.20 ms  (63.7× FedAvg)  [O(nd + n² )]
+    Ours           :   32.24 ± 8.55 ms  (233.4× FedAvg)  [O(nd + n·m)]
 
   n_clients = 200
-    FedAvg         :    0.26 ± 0.01 ms  (1.0× FedAvg)  [O(nd)]
-    Multi-Krum     :    4.06 ± 0.06 ms  (15.7× FedAvg)  [O(n²d)]
-    TrimmedMean    :    0.15 ± 0.01 ms  (0.6× FedAvg)  [O(nd log n)]
-    Bulyan         :    4.46 ± 0.92 ms  (17.3× FedAvg)  [O(n²d)]
-    RFVIR          :    1.20 ± 0.24 ms  (4.6× FedAvg)  [O(nd)]
-    FLAME          :   10.71 ± 0.50 ms  (41.5× FedAvg)  [O(nd + n² )]
-    Ours           :   59.40 ± 3.69 ms  (230.1× FedAvg)  [O(nd + n·m)]
+    FedAvg         :    0.28 ± 0.01 ms  (1.0× FedAvg)  [O(nd)]
+    Multi-Krum     :    5.52 ± 1.25 ms  (19.5× FedAvg)  [O(n²d)]
+    TrimmedMean    :    0.16 ± 0.00 ms  (0.6× FedAvg)  [O(nd log n)]
+    Bulyan         :    4.27 ± 0.14 ms  (15.1× FedAvg)  [O(n²d)]
+    RFVIR          :    1.13 ± 0.13 ms  (4.0× FedAvg)  [O(nd)]
+    FLAME          :   10.66 ± 0.37 ms  (37.6× FedAvg)  [O(nd + n² )]
+    Ours           :   54.96 ± 2.72 ms  (194.0× FedAvg)  [O(nd + n·m)]
 
 Saved results/overhead.csv and overhead_latex.txt
 [Copy overhead_latex.txt content into Section V of the LaTeX file]

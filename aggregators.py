@@ -1,4 +1,5 @@
 from fl_model import FLNeuralNet
+from fl_base import compute_kappa
 """
 aggregators.py — All aggregation methods
 FedAvg, Krum, TrimmedMean, Bulyan, RFVIR, FLAME, Ours (Multi-Layer)
@@ -247,5 +248,109 @@ class MultiLayerAggregator:
 
         return agg, outlier_flags, kappas, self.trust_scores[client_ids].copy()
 
+
+print("aggregators.py loaded successfully.")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Aggregator wrapper classes
+# Each wraps a standalone aggregation function with the same interface
+# as MultiLayerAggregator so FederatedServer can use any of them.
+#
+# Interface:
+#   .aggregate(updates, global_params, X_val, y_val, scaler, client_ids)
+#   returns (agg_update, outlier_flags, kappas, trust_scores)
+# ══════════════════════════════════════════════════════════════════════════════
+
+class _SimpleAggregator:
+    """
+    Base wrapper — turns a standalone aggregation function into
+    a class with the same interface as MultiLayerAggregator.
+    outlier_flags, kappas, trust_scores are all None for simple methods.
+    """
+    delta      = 0.2    # dummy — not used
+    trust_thresh = 0.3  # dummy — not used
+
+    def __init__(self, n_clients, **kwargs):
+        self.n_clients = n_clients
+        self.trust_scores = np.ones(n_clients)
+
+    def _agg(self, updates, global_params):
+        raise NotImplementedError
+
+    def aggregate(self, updates, global_params,
+                  X_val=None, y_val=None, scaler=None,
+                  client_ids=None, lr=0.01):
+        agg = self._agg(updates, global_params)
+        n   = len(updates)
+        dummy_flags  = np.zeros(n, dtype=bool)
+        dummy_kappas = np.ones(n)
+        dummy_trust  = np.ones(n)
+        return agg, dummy_flags, dummy_kappas, dummy_trust
+
+
+class FedAvgAggregator(_SimpleAggregator):
+    """FedAvg — Blanchard et al. standard averaging."""
+    def _agg(self, updates, global_params):
+        return fedavg(updates)
+
+
+class KrumAggregator(_SimpleAggregator):
+    """Multi-Krum — Blanchard et al. NeurIPS 2017."""
+    def __init__(self, n_clients, f=None, m=3, **kwargs):
+        super().__init__(n_clients)
+        self.f = f or max(1, n_clients // 5)
+        self.m = m
+
+    def _agg(self, updates, global_params):
+        return krum(updates, f=self.f, m=self.m)
+
+
+class TrimmedMeanAggregator(_SimpleAggregator):
+    """Coordinate-wise trimmed mean — Yin et al. ICML 2018."""
+    def __init__(self, n_clients, trim_ratio=0.1, **kwargs):
+        super().__init__(n_clients)
+        self.trim_ratio = trim_ratio
+
+    def _agg(self, updates, global_params):
+        return trimmed_mean(updates, trim_ratio=self.trim_ratio)
+
+
+class BulyanAggregator(_SimpleAggregator):
+    """Bulyan — El Mhamdi et al. ICML 2018."""
+    def __init__(self, n_clients, f=None, **kwargs):
+        super().__init__(n_clients)
+        self.f = f or max(1, n_clients // 5)
+
+    def _agg(self, updates, global_params):
+        return bulyan(updates, f=self.f)
+
+
+class RFVIRAggregator(_SimpleAggregator):
+    """RFVIR — Wang et al. Information Fusion 2024."""
+    def _agg(self, updates, global_params):
+        return rfvir(updates, global_params)
+
+
+class FLAMEAggregator(_SimpleAggregator):
+    """FLAME — Nguyen et al. USENIX Security 2022."""
+    def __init__(self, n_clients, noise_std=0.001, **kwargs):
+        super().__init__(n_clients)
+        self.noise_std = noise_std
+
+    def _agg(self, updates, global_params):
+        return flame(updates, noise_std=self.noise_std)
+
+
+# Registry: method name → aggregator class
+AGGREGATOR_REGISTRY = {
+    'FedAvg':      FedAvgAggregator,
+    'Multi-Krum':  KrumAggregator,
+    'TrimmedMean': TrimmedMeanAggregator,
+    'Bulyan':      BulyanAggregator,
+    'RFVIR':       RFVIRAggregator,
+    'FLAME':       FLAMEAggregator,
+    'Ours':        MultiLayerAggregator,
+}
 
 print("aggregators.py loaded successfully.")

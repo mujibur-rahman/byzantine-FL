@@ -20,8 +20,8 @@ Preparing data for adaptive adversary experiments...
   A: Sleeper (delayed activation, T_burn=20)
 ============================================================
 Traceback (most recent call last):
-  File "/home/mujibur/development/byzantine-FL/experiment5_adaptive.py", line 295, in <module>
+  File "/home/mujibur/development/byzantine-FL/experiment5_adaptive.py", line 296, in <module>
     rdf, cdf = run_adaptive(variant, N_ROUNDS, T_BURN)
-  File "/home/mujibur/development/byzantine-FL/experiment5_adaptive.py", line 147, in run_adaptive
-    dw, db = m.train(Xc, yc, lr=LR, epochs=5, batch_size=32)
-TypeError: cannot unpack non-iterable NoneType object
+  File "/home/mujibur/development/byzantine-FL/experiment5_adaptive.py", line 213, in run_adaptive
+    agg_update += w * update
+ValueError: operands could not be broadcast together with shapes (11,) (17345,) (11,) 
