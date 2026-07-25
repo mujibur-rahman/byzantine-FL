@@ -1,0 +1,14 @@
+\begin{table}[t]\centering\small
+\caption{Divergence-measure ablation: Byzantine-detection AUC (higher is better) per attack type.}
+\label{tab:divergence_ablation}
+\begin{tabular}{lcccccc}
+\toprule
+Attack & kappa & KL & KL\_sym & Renyi\_0.5 & Renyi\_2 & Renyi\_inf \\
+\midrule
+lfp & \textbf{0.750} & 0.012 & 0.012 & 0.011 & 0.013 & 0.043 \\
+spf & \textbf{0.498} & 0.412 & 0.397 & 0.409 & 0.425 & 0.467 \\
+ooa & \textbf{0.538} & 0.469 & 0.490 & 0.475 & 0.469 & 0.480 \\
+grad-p & 0.707 & 0.971 & \textbf{0.994} & 0.986 & 0.960 & 0.948 \\
+\bottomrule
+\end{tabular}
+\end{table}
