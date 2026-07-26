@@ -144,7 +144,7 @@ def run_divergence_analysis(attack_type):
             if is_byz and attack_type == 'grad-p':
                 dw2, db2 = attack_gradient_poison(
                     update[:-1], update[-1], scale=3.0)
-                update = update + noise
+                update = np.append(dw2, db2)
 
             updates.append(update)
             is_byz_flags.append(is_byz)
@@ -168,7 +168,7 @@ def run_divergence_analysis(attack_type):
         p_fraud_global = pred_global.mean()   # fraction predicted fraud
 
         # ── Per-client semantic divergence analysis ───────────────────
-        agg_update = np.zeros(n_features + 1)
+        agg_update = np.zeros(len(global_params))
         weight_sum = 0.0
 
         for idx, (update, is_byz_gt) in enumerate(

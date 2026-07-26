@@ -1,0 +1,4 @@
+Variant,Attack,Outlier latency,Trust latency,Kappa latency,Combined latency,Burn-in FPR (%),Final Acc (%)
+A,"Sleeper (delayed activation, T_burn=20)",Never,Never,13,13,62.5,94.0
+B,Mimicry (gradient-constrained poisoning),Never,Never,Never,Never,7.5,96.3
+C,Slow drift (ramp 5%/round to 40% flip),Never,Never,Never,Never,11.8,97.5

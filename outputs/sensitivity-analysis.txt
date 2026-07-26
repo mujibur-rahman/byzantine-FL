@@ -1,0 +1,240 @@
+####	SENSITIVITY ANALYSIS	###
+
+PS D:\experiment\byzantine-FL> python3 experiment2_sensitivity.py --dataset nyc-taxi --data .\data\divergence-ds\nyc_real100000.csv
+fl_base.py loaded successfully.
+aggregators.py loaded successfully.
+aggregators.py loaded successfully.
+Preparing data for sensitivity analysis...
+
+============================================================
+  Dataset : nyc-taxi  (real data override)
+  Source  : .\data\divergence-ds\nyc_real100000.csv
+  Samples : 100,000   fraud_rate: 9.2%
+============================================================
+
+[1/3] Sweeping τ (outlier threshold)...
+  τ=1.0  Acc=94.0%  F1=72.8%
+  τ=1.5  Acc=92.2%  F1=14.2%
+  τ=2.0  Acc=91.8%  F1=7.9% ← default
+  τ=2.5  Acc=91.8%  F1=7.9%
+  τ=3.0  Acc=92.2%  F1=68.2%
+
+[2/3] Sweeping α (trust decay factor)...
+  α=0.5  Acc=92.3%  F1=17.2%
+  α=0.6  Acc=91.8%  F1=6.8%
+  α=0.7  Acc=91.7%  F1=4.6%
+  α=0.8  Acc=93.2%  F1=34.1% ← default
+  α=0.9  Acc=87.0%  F1=56.5%
+
+[3/3] Sweeping δ (Kappa detection threshold)...
+  δ=0.10  Acc=91.8%  F1=6.8%
+  δ=0.15  Acc=94.4%  F1=50.9%
+  δ=0.20  Acc=89.5%  F1=60.6% ← default
+  δ=0.25  Acc=94.0%  F1=69.3%
+  δ=0.30  Acc=92.7%  F1=68.5%
+
+── Sensitivity Summary ─────────────────────────────────────────────
+
+τ sweep (α=0.8, δ=0.2):
+  τ  Accuracy (%)  F1 (%)
+1.0          94.0    72.8
+1.5          92.2    14.2
+2.0          91.8     7.9
+2.5          91.8     7.9
+3.0          92.2    68.2
+
+α sweep (τ=2.0, δ=0.2):
+  α  Accuracy (%)  F1 (%)
+0.5          92.3    17.2
+0.6          91.8     6.8
+0.7          91.7     4.6
+0.8          93.2    34.1
+0.9          87.0    56.5
+
+δ sweep (τ=2.0, α=0.8):
+   δ  Accuracy (%)  F1 (%)
+0.10          91.8     6.8
+0.15          94.4    50.9
+0.20          89.5    60.6
+0.25          94.0    69.3
+0.30          92.7    68.5
+
+
+PS D:\experiment\byzantine-FL> python3 experiment2_sensitivity.py --dataset foursquare --data .\data\divergence-ds\foursquare_real100000.csv
+fl_base.py loaded successfully.
+aggregators.py loaded successfully.
+aggregators.py loaded successfully.
+Preparing data for sensitivity analysis...
+
+============================================================
+  Dataset : foursquare  (real data override)
+  Source  : .\data\divergence-ds\foursquare_real100000.csv
+  Samples : 86,602   fraud_rate: 12.6%
+============================================================
+
+[1/3] Sweeping τ (outlier threshold)...
+  τ=1.0  Acc=89.8%  F1=41.9%
+  τ=1.5  Acc=90.2%  F1=22.2%
+  τ=2.0  Acc=90.8%  F1=30.9% ← default
+  τ=2.5  Acc=90.4%  F1=25.0%
+  τ=3.0  Acc=75.0%  F1=41.4%
+
+[2/3] Sweeping α (trust decay factor)...
+  α=0.5  Acc=90.1%  F1=20.8%
+  α=0.6  Acc=90.3%  F1=24.3%
+  α=0.7  Acc=82.9%  F1=47.9%
+  α=0.8  Acc=90.2%  F1=22.2% ← default
+  α=0.9  Acc=81.6%  F1=45.2%
+
+[3/3] Sweeping δ (Kappa detection threshold)...
+  δ=0.10  Acc=90.5%  F1=27.6%
+  δ=0.15  Acc=90.2%  F1=22.2%
+  δ=0.20  Acc=90.2%  F1=22.2% ← default
+  δ=0.25  Acc=90.5%  F1=26.3%
+  δ=0.30  Acc=90.2%  F1=22.9%
+
+── Sensitivity Summary ─────────────────────────────────────────────
+
+τ sweep (α=0.8, δ=0.2):
+  τ  Accuracy (%)  F1 (%)
+1.0          89.8    41.9
+1.5          90.2    22.2
+2.0          90.8    30.9
+2.5          90.4    25.0
+3.0          75.0    41.4
+
+α sweep (τ=2.0, δ=0.2):
+  α  Accuracy (%)  F1 (%)
+0.5          90.1    20.8
+0.6          90.3    24.3
+0.7          82.9    47.9
+0.8          90.2    22.2
+0.9          81.6    45.2
+
+δ sweep (τ=2.0, α=0.8):
+   δ  Accuracy (%)  F1 (%)
+0.10          90.5    27.6
+0.15          90.2    22.2
+0.20          90.2    22.2
+0.25          90.5    26.3
+0.30          90.2    22.9
+
+
+PS D:\experiment\byzantine-FL> python3 experiment2_sensitivity.py --dataset yelp --data .\data\divergence-ds\yelp_real100000.csv
+fl_base.py loaded successfully.
+aggregators.py loaded successfully.
+aggregators.py loaded successfully.
+Preparing data for sensitivity analysis...
+
+============================================================
+  Dataset : yelp  (real data override)
+  Source  : .\data\divergence-ds\yelp_real100000.csv
+  Samples : 100,000   fraud_rate: 1.8%
+============================================================
+
+[1/3] Sweeping τ (outlier threshold)...
+  τ=1.0  Acc=97.9%  F1=0.0%
+  τ=1.5  Acc=97.9%  F1=0.0%
+  τ=2.0  Acc=97.9%  F1=0.0% ← default
+  τ=2.5  Acc=97.9%  F1=0.0%
+  τ=3.0  Acc=98.5%  F1=61.5%
+
+[2/3] Sweeping α (trust decay factor)...
+  α=0.5  Acc=97.9%  F1=0.0%
+  α=0.6  Acc=98.0%  F1=4.7%
+  α=0.7  Acc=97.9%  F1=0.0%
+  α=0.8  Acc=98.2%  F1=58.1% ← default
+  α=0.9  Acc=97.9%  F1=0.0%
+
+[3/3] Sweeping δ (Kappa detection threshold)...
+  δ=0.10  Acc=97.9%  F1=0.0%
+  δ=0.15  Acc=97.9%  F1=0.0%
+  δ=0.20  Acc=97.9%  F1=0.0% ← default
+  δ=0.25  Acc=97.9%  F1=0.0%
+  δ=0.30  Acc=97.9%  F1=0.0%
+
+── Sensitivity Summary ─────────────────────────────────────────────
+
+τ sweep (α=0.8, δ=0.2):
+  τ  Accuracy (%)  F1 (%)
+1.0          97.9     0.0
+1.5          97.9     0.0
+2.0          97.9     0.0
+2.5          97.9     0.0
+3.0          98.5    61.5
+
+α sweep (τ=2.0, δ=0.2):
+  α  Accuracy (%)  F1 (%)
+0.5          97.9     0.0
+0.6          98.0     4.7
+0.7          97.9     0.0
+0.8          98.2    58.1
+0.9          97.9     0.0
+
+δ sweep (τ=2.0, α=0.8):
+   δ  Accuracy (%)  F1 (%)
+0.10          97.9     0.0
+0.15          97.9     0.0
+0.20          97.9     0.0
+0.25          97.9     0.0
+0.30          97.9     0.0
+
+
+PS D:\experiment\byzantine-FL> python3 experiment2_sensitivity.py --dataset geolife --data .\data\divergence-ds\geolife_real100000.csv
+fl_base.py loaded successfully.
+aggregators.py loaded successfully.
+aggregators.py loaded successfully.
+Preparing data for sensitivity analysis...
+
+============================================================
+  Dataset : geolife  (real data override)
+  Source  : .\data\divergence-ds\geolife_real100000.csv
+  Samples : 18,426   fraud_rate: 3.9%
+============================================================
+
+[1/3] Sweeping τ (outlier threshold)...
+  τ=1.0  Acc=96.5%  F1=0.0%
+  τ=1.5  Acc=75.3%  F1=21.6%
+  τ=2.0  Acc=82.9%  F1=19.7% ← default
+  τ=2.5  Acc=96.5%  F1=0.0%
+  τ=3.0  Acc=86.9%  F1=25.9%
+
+[2/3] Sweeping α (trust decay factor)...
+  α=0.5  Acc=96.5%  F1=0.0%
+  α=0.6  Acc=96.5%  F1=0.0%
+  α=0.7  Acc=96.5%  F1=0.0%
+  α=0.8  Acc=96.5%  F1=0.0% ← default
+  α=0.9  Acc=81.3%  F1=25.5%
+
+[3/3] Sweeping δ (Kappa detection threshold)...
+  δ=0.10  Acc=96.5%  F1=0.0%
+  δ=0.15  Acc=87.9%  F1=27.6%
+  δ=0.20  Acc=86.8%  F1=27.4% ← default
+  δ=0.25  Acc=96.5%  F1=0.0%
+  δ=0.30  Acc=96.5%  F1=0.0%
+
+── Sensitivity Summary ─────────────────────────────────────────────
+
+τ sweep (α=0.8, δ=0.2):
+  τ  Accuracy (%)  F1 (%)
+1.0          96.5     0.0
+1.5          75.3    21.6
+2.0          82.9    19.7
+2.5          96.5     0.0
+3.0          86.9    25.9
+
+α sweep (τ=2.0, δ=0.2):
+  α  Accuracy (%)  F1 (%)
+0.5          96.5     0.0
+0.6          96.5     0.0
+0.7          96.5     0.0
+0.8          96.5     0.0
+0.9          81.3    25.5
+
+δ sweep (τ=2.0, α=0.8):
+   δ  Accuracy (%)  F1 (%)
+0.10          96.5     0.0
+0.15          87.9    27.6
+0.20          86.8    27.4
+0.25          96.5     0.0
+0.30          96.5     0.0

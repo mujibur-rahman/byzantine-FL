@@ -1,0 +1,29 @@
+\begin{table*}[t]\centering\scriptsize
+\caption{Per-layer detection (Precision / Recall / F1, \%) under 20\% Byzantine, real data. \textbf{Kappa-only TP} = Byzantine clients caught by the Kappa layer but missed by the outlier and trust layers (Corollary~1). Combined F1 is \textbf{bold} only where it exceeds every single layer. Note: on semantic attacks the Kappa layer's precision approaches the 20\% base rate (broad flagging), so read P/R/F1 jointly.}
+\label{tab:layer_analysis}
+\begin{tabular}{llccccc}
+\toprule
+Dataset & Attack & Outlier (P/R/F1) & Trust (P/R/F1) & Kappa (P/R/F1) & Combined (P/R/F1) & \shortstack{Kappa-only\\TP} \\
+\midrule
+NYC-Taxi & Grad-poison & 100/42/60 & 100/28/43 & 70/48/57 & \textbf{78/72/75} & 10 \\
+ & GPS-spoof & 31/10/15 & 17/8/10 & 20/85/33 & \textbf{20/88/33} & 29 \\
+ & Label-flip & 9/2/4 & 0/0/0 & 0/0/0 & 8/2/4 & 0 \\
+ & On-off & 7/2/4 & 0/0/0 & 0/0/0 & 7/2/4 & 0 \\
+\midrule
+Foursquare & Grad-poison & 100/40/57 & 100/25/40 & 100/32/49 & \textbf{100/60/75} & 4 \\
+ & GPS-spoof & 9/2/4 & 0/0/0 & 34/72/46 & 33/75/46 & 29 \\
+ & Label-flip & 0/0/0 & 0/0/0 & 0/0/0 & 0/0/0 & 0 \\
+ & On-off & 10/2/4 & 0/0/0 & 0/0/0 & 10/2/4 & 0 \\
+\midrule
+Yelp & Grad-poison & 100/40/57 & 53/50/51 & 24/95/39 & 25/98/40 & 13 \\
+ & GPS-spoof & 31/12/18 & 16/48/24 & 20/78/32 & \textbf{21/88/33} & 13 \\
+ & Label-flip & 8/2/4 & 0/0/0 & 8/32/13 & \textbf{8/35/14} & 13 \\
+ & On-off & 31/12/18 & 17/60/27 & 21/92/34 & \textbf{21/98/35} & 12 \\
+\midrule
+Geolife & Grad-poison & 100/52/69 & 24/62/34 & 24/98/39 & 25/100/40 & 9 \\
+ & GPS-spoof & 50/2/5 & 17/32/22 & 19/65/29 & 19/65/29 & 12 \\
+ & Label-flip & 0/0/0 & 0/0/0 & 5/12/7 & 5/12/7 & 5 \\
+ & On-off & 0/0/0 & 18/35/24 & 20/72/31 & 20/72/31 & 15 \\
+\bottomrule
+\end{tabular}
+\end{table*}

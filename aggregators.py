@@ -187,13 +187,28 @@ class MultiLayerAggregator:
         self.n_clients   = n_clients
 
     def aggregate(self, updates, global_params, X_val, y_val, scaler,
-                  client_ids, lr=0.01):
+                  client_ids, lr=0.01, stalenesses=None, staleness_a=0.5,
+                  ref_params_list=None):
         """
         updates     : list of gradient vectors (one per client)
         global_params : current global model params
         X_val, y_val  : server-held validation set
         scaler        : fitted StandardScaler
         client_ids    : indices into self.trust_scores
+        stalenesses : optional list of per-update staleness (server-model
+                      versions elapsed since the client trained). When given,
+                      each aggregation weight is decayed by
+                      (1 + staleness) ** (-staleness_a), i.e. FedBuff/FedAsync
+                      staleness weighting. None (default) = synchronous, no
+                      decay, so existing sync callers are unaffected.
+        staleness_a : decay exponent for the staleness weight (a>0).
+        ref_params_list : optional per-update reference params (the global
+                      VERSION each client trained on). When given, Kappa for
+                      client j is evaluated against ref_params_list[j] instead
+                      of the current global_params — staleness-corrected Kappa,
+                      so a stale-but-honest client is not flagged for drift it
+                      never saw. None (default) = compare against current
+                      global (synchronous behaviour, unchanged).
         """
         n_feat = len(global_params) - 1
         n = len(updates)
@@ -211,11 +226,14 @@ class MultiLayerAggregator:
         kappas  = []
 
         for j, (u, cid) in enumerate(zip(updates, client_ids)):
-            # Kappa: apply this client's update to global model
-            candidate_params = global_params.copy()
-            candidate_params += lr * u
-            kappa = compute_kappa(candidate_params, global_params,
-                                  X_val, scaler)
+            # Kappa: apply this client's update to the reference model, then
+            # measure prediction agreement against that same reference. The
+            # reference is the version the client trained on when
+            # ref_params_list is supplied (staleness-corrected), else current.
+            base = (ref_params_list[j] if ref_params_list is not None
+                    else global_params)
+            candidate_params = base + lr * u
+            kappa = compute_kappa(candidate_params, base, X_val, scaler)
             kappas.append(kappa)
 
             # Trust update
@@ -234,6 +252,11 @@ class MultiLayerAggregator:
 
         weights = np.array(weights)
         kappas  = np.array(kappas)
+
+        # ── Staleness weighting (buffered semi-async / FedBuff) ───────────
+        if stalenesses is not None:
+            stale = np.asarray(stalenesses, dtype=float)
+            weights = weights * (1.0 + stale) ** (-staleness_a)
 
         if weights.sum() < 1e-10:
             # Fallback: use all non-outlier updates equally
@@ -280,7 +303,10 @@ class _SimpleAggregator:
 
     def aggregate(self, updates, global_params,
                   X_val=None, y_val=None, scaler=None,
-                  client_ids=None, lr=0.01):
+                  client_ids=None, lr=0.01,
+                  stalenesses=None, staleness_a=0.5, ref_params_list=None):
+        # Simple baselines ignore staleness (no staleness-aware weighting);
+        # accepted only so the async driver can call them uniformly.
         agg = self._agg(updates, global_params)
         n   = len(updates)
         dummy_flags  = np.zeros(n, dtype=bool)

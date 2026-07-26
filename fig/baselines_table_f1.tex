@@ -1,0 +1,29 @@
+\begin{table*}[t]\centering\small
+\caption{Byzantine robustness by \textbf{F1-score (\%)} under 20\% Byzantine clients on real data (best per attack in \textbf{bold}). Accuracy is omitted because majority-class inflation makes it uninformative on the imbalanced datasets.}
+\label{tab:baselines_f1}
+\begin{tabular}{llccccccc}
+\toprule
+Dataset & Attack & FedAvg & Multi-Krum & TrimmedMean & Bulyan & RFVIR & FLAME & Ours \\
+\midrule
+NYC-Taxi & Grad-poison & 58.9 & 95.6 & 95.4 & 96.3 & 78.1 & \textbf{96.6} & 94.7 \\
+ & GPS-spoof & 94.5 & 95.3 & 95.9 & 95.8 & 96.2 & \textbf{96.7} & 94.7 \\
+ & Label-flip & 96.3 & 95.2 & \textbf{96.5} & 93.2 & 95.9 & 96.1 & 95.4 \\
+ & On-off & 96.3 & 95.2 & 96.1 & 95.2 & 94.7 & \textbf{97.0} & 96.1 \\
+\midrule
+Foursquare & Grad-poison & 0.0 & 25.7 & 25.7 & \textbf{31.7} & 19.5 & 29.0 & 29.6 \\
+ & GPS-spoof & 30.9 & 26.4 & 28.4 & 26.2 & 25.7 & 33.7 & \textbf{40.7} \\
+ & Label-flip & 28.0 & 28.1 & 31.1 & 32.6 & 28.4 & 29.7 & \textbf{45.2} \\
+ & On-off & 28.9 & 22.2 & 29.0 & 25.9 & 24.3 & \textbf{36.7} & 29.7 \\
+\midrule
+Yelp & Grad-poison & 40.7 & 38.5 & 0.0 & 9.1 & 0.0 & \textbf{54.8} & 11.6 \\
+ & GPS-spoof & 0.0 & 0.0 & 4.7 & 0.0 & 0.0 & 57.1 & \textbf{66.7} \\
+ & Label-flip & 9.1 & 58.1 & 38.5 & 55.9 & 0.0 & 0.0 & \textbf{60.3} \\
+ & On-off & 17.4 & 0.0 & 0.0 & 0.0 & 0.0 & \textbf{67.7} & 55.6 \\
+\midrule
+Geolife & Grad-poison & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & \textbf{19.3} \\
+ & GPS-spoof & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & \textbf{20.5} \\
+ & Label-flip & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+ & On-off & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+\bottomrule
+\end{tabular}
+\end{table*}

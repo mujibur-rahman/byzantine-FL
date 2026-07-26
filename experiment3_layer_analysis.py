@@ -116,7 +116,7 @@ def run_layer_analysis(attack_type):
 
             if is_byz and attack_type == 'grad-p':
                 dw2, db2 = attack_gradient_poison(update[:-1], update[-1], scale=3.0)
-                update = update + noise
+                update = np.append(dw2, db2)
 
             updates.append((cid, update, cid in byzantine_ids))
 
@@ -239,7 +239,7 @@ for attack in ATTACK_TYPES:
     })
 
 df_summary = pd.DataFrame(summary_rows)
-df_summary.to_csv(tag('layer_confusion.csv'), index=False)
+df_summary.to_csv(tag(f'{DATASET_NAME}_layer_confusion.csv'), index=False)
 
 # ── LaTeX table output ───────────────────────────────────────────────────────
 latex = r"""\begin{table}[htbp]
@@ -265,8 +265,8 @@ latex += r"""\bottomrule
 \end{table}
 """
 
-with open(tag('layer_confusion_latex.txt'), 'w') as f:
+with open(tag(f'{DATASET_NAME}_layer_confusion_latex.txt'), 'w') as f:
     f.write(latex)
 
-print("\nSaved results/layer_confusion.csv and layer_confusion_latex.txt")
+print(f"\nSaved results/{DATASET_NAME}_layer_confusion.csv and {DATASET_NAME}_layer_confusion_latex.txt")
 print("[The 'Kappa-only TPs' column is the key evidence for Corollary 1]")

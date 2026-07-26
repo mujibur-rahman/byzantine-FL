@@ -50,7 +50,8 @@ class FederatedServer:
                  scaler=None,
                  lr=0.01,
                  async_mode=False,
-                 max_staleness=5):
+                 max_staleness=5,
+                 staleness_corrected_kappa=True):
 
         self.n_features       = n_features
         self.n_clients        = n_clients
@@ -58,11 +59,19 @@ class FederatedServer:
         self.lr               = lr
         self.async_mode       = async_mode
         self.max_staleness    = max_staleness
+        # When True (async only), Kappa is evaluated against the global
+        # VERSION each client trained on rather than the latest global, so a
+        # stale-but-honest client is not penalised for drift it never saw.
+        self.staleness_corrected_kappa = staleness_corrected_kappa
 
         # Global model
         self.global_model  = FLNeuralNet(n_features)
         self.global_params = self.global_model.get_params()
         self.round         = 0
+
+        # History of past global versions {version -> params} for
+        # staleness-corrected Kappa. Pruned to the staleness window.
+        self.version_history = {0: self.global_params.copy()}
 
         # Validation set (D_val — server-held for Kappa evaluation)
         self.X_val  = X_val
@@ -119,6 +128,7 @@ class FederatedServer:
             'client_id':  client_id,
             'update':     update,
             'staleness':  staleness,
+            'trained_at': sent_at_round,     # global version the client used
             'received_at':self.round,
         })
         return True
@@ -139,10 +149,24 @@ class FederatedServer:
         updates    = [p['update']    for p in pending]
         client_ids = [p['client_id'] for p in pending]
         stalenesses= [p['staleness'] for p in pending]
+        trained_at = [p.get('trained_at', self.round) for p in pending]
 
         t_start = time.perf_counter()
 
         # ── Three-layer defence ───────────────────────────────────────
+        # In async mode, pass per-update staleness so the aggregator can
+        # down-weight stale updates (FedBuff). In sync mode staleness is
+        # always 0, so we omit it and behave exactly as before.
+        agg_kwargs = dict(lr=self.lr)
+        if self.async_mode:
+            agg_kwargs['stalenesses'] = stalenesses
+            if self.staleness_corrected_kappa:
+                # Reference each update against the global version it trained
+                # on (falls back to current global if that version was pruned).
+                agg_kwargs['ref_params_list'] = [
+                    self.version_history.get(t, self.global_params)
+                    for t in trained_at
+                ]
         agg_update, outlier_flags, kappas, trust_scores = \
             self.aggregator.aggregate(
                 updates,
@@ -151,7 +175,7 @@ class FederatedServer:
                 self.y_val,
                 self.scaler,
                 client_ids,
-                lr=self.lr,
+                **agg_kwargs,
             )
 
         # ── Apply aggregated update to global model ───────────────────
@@ -194,6 +218,11 @@ class FederatedServer:
 
         self.history.append(metrics)
         self.round += 1
+
+        # Record the new global version and prune beyond the staleness window
+        self.version_history[self.round] = self.global_params.copy()
+        while len(self.version_history) > self.max_staleness + 2:
+            del self.version_history[min(self.version_history)]
 
         return metrics
 

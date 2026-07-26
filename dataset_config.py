@@ -40,6 +40,18 @@ def _parse_dataset_name():
 
 DATASET_NAME = _parse_dataset_name()
 
+
+# ── Parse optional real-data override (--data <path> or DATA_FILE env) ────────
+def _parse_data_file():
+    for i, arg in enumerate(sys.argv):
+        if arg == '--data' and i + 1 < len(sys.argv):
+            return sys.argv[i + 1].strip()
+        if arg.startswith('--data='):
+            return arg.split('=', 1)[1].strip()
+    return os.environ.get('DATA_FILE', '').strip() or None
+
+DATA_FILE = _parse_data_file()
+
 # ── Dataset registry ──────────────────────────────────────────────────────────
 # Edit paths to match your local download locations.
 DATASET_REGISTRY = {
@@ -106,6 +118,28 @@ def get_dataset(seed=42):
         )
 
     cfg = DATASET_REGISTRY[DATASET_NAME]
+
+    # ── Real-data override: load a prepped npz/csv (from prep_*.py) ────────────
+    # Set via --data <path> or DATA_FILE env; applies to ALL experiments so the
+    # full suite runs on real data without editing each script.
+    if DATA_FILE:
+        import pandas as pd
+        if DATA_FILE.endswith('.npz'):
+            d = np.load(DATA_FILE); X, y = d['X'].astype(float), d['y'].astype(float)
+        else:
+            df = pd.read_csv(DATA_FILE)
+            if 'label' in df.columns:
+                y = df['label'].values.astype(float)
+                X = df.drop(columns=['label']).values.astype(float)
+            else:
+                y = df.iloc[:, -1].values.astype(float)
+                X = df.iloc[:, :-1].values.astype(float)
+        print(f"\n{'='*60}")
+        print(f"  Dataset : {DATASET_NAME}  (real data override)")
+        print(f"  Source  : {DATA_FILE}")
+        print(f"  Samples : {len(y):,}   fraud_rate: {y.mean():.1%}")
+        print(f"{'='*60}")
+        return X, y
 
     print(f"\n{'='*60}")
     print(f"  Dataset : {DATASET_NAME}")

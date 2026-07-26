@@ -51,6 +51,18 @@ VAL_SIZE         = 2000
 SEED             = 42
 ATTACK           = 'lfp'      # label flipping — hardest for semantic detection
 
+# Number of seeds to average each configuration over (--seeds N). Single-seed
+# F1 on imbalanced data is a knife-edge (majority-collapse vs learned fraud);
+# averaging over seeds is what makes the sensitivity curves meaningful.
+def _parse_seeds(default=3):
+    for i, a in enumerate(sys.argv):
+        if a == '--seeds' and i + 1 < len(sys.argv):
+            return int(sys.argv[i + 1])
+        if a.startswith('--seeds='):
+            return int(a.split('=', 1)[1])
+    return default
+N_SEEDS = _parse_seeds()
+
 # Defaults
 TAU_DEFAULT   = 2.0
 ALPHA_DEFAULT = 0.8
@@ -62,10 +74,7 @@ print("Preparing data for sensitivity analysis...")
 X, y = get_dataset(seed=SEED)
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
-X_val, y_val = make_validation_set(X_scaled, y, VAL_SIZE, seed=SEED)
 
-clients = partition_noniid(X_scaled, y, N_CLIENTS,
-                           alpha=NONIID_ALPHA, seed=SEED)
 n_byzantine = int(N_CLIENTS * BYZANTINE_RATIO)
 n_benign    = N_CLIENTS - n_byzantine
 byzantine_ids = list(range(n_benign, N_CLIENTS))
@@ -73,19 +82,21 @@ benign_ids    = list(range(n_benign))
 n_features    = X_scaled.shape[1]
 
 
-def run_ours(tau, alpha, delta, n_rounds=N_ROUNDS):
-    """Run multi-layer aggregator with given hyperparams. Return final acc & F1."""
+def _run_once(tau, alpha, delta, seed, n_rounds=N_ROUNDS):
+    """One FL run for a hyperparam config at a given seed. Returns (acc, f1)."""
+    np.random.seed(seed)                       # model-init randomness
+    X_val, y_val = make_validation_set(X_scaled, y, VAL_SIZE, seed=seed)
+    clients = partition_noniid(X_scaled, y, N_CLIENTS,
+                               alpha=NONIID_ALPHA, seed=seed)
     global_model  = FLNeuralNet(n_features)
     global_params = global_model.get_params()
     aggregator    = MultiLayerAggregator(
         N_CLIENTS, tau=tau, alpha=alpha, delta=delta)
 
-    accs = []
     for rnd in range(n_rounds):
-        rng = np.random.RandomState(SEED + rnd)
+        rng = np.random.RandomState(seed * 1000 + rnd)
         n_byz_round = max(1, int(CLIENTS_PER_ROUND * BYZANTINE_RATIO))
         n_ben_round = CLIENTS_PER_ROUND - n_byz_round
-
         sampled_b = rng.choice(benign_ids,
                     min(n_ben_round, len(benign_ids)), replace=False).tolist()
         sampled_m = rng.choice(byzantine_ids,
@@ -97,18 +108,15 @@ def run_ours(tau, alpha, delta, n_rounds=N_ROUNDS):
             Xc, yc = clients[cid]
             if len(Xc) == 0:
                 continue
-            is_byz = cid in byzantine_ids
-            if is_byz and ATTACK == 'lfp':
+            if (cid in byzantine_ids) and ATTACK == 'lfp':
                 yc = attack_label_flip(yc, flip_rate=0.30)
-
             m = FLNeuralNet(n_features)
             m.set_params(global_params.copy())
-            dw, db = m.train(Xc, yc, lr=LR, epochs=5, batch_size=32)
-            updates.append(np.append(dw, db))
+            m.train(Xc, yc, lr=LR, epochs=5, batch_size=32)
+            updates.append(m.get_params() - global_params)
 
         if not updates:
             continue
-
         agg, _, _, _ = aggregator.aggregate(
             updates, global_params, X_val, y_val, scaler, sampled)
         global_params = global_params + LR * agg
@@ -117,18 +125,32 @@ def run_ours(tau, alpha, delta, n_rounds=N_ROUNDS):
     pred = global_model.predict(X_val)
     acc  = accuracy_score(y_val, pred) * 100
     f1   = f1_score(y_val, pred, zero_division=0) * 100
-    return round(acc, 1), round(f1, 1)
+    return acc, f1
 
+
+def run_ours(tau, alpha, delta, n_rounds=N_ROUNDS):
+    """Average over N_SEEDS. Returns (acc_mean, acc_std, f1_mean, f1_std)."""
+    accs, f1s = [], []
+    for s in range(N_SEEDS):
+        a, f = _run_once(tau, alpha, delta, seed=SEED + s, n_rounds=n_rounds)
+        accs.append(a); f1s.append(f)
+    return (round(float(np.mean(accs)), 1), round(float(np.std(accs)), 1),
+            round(float(np.mean(f1s)), 1),  round(float(np.std(f1s)), 1))
+
+
+print(f"Averaging each configuration over {N_SEEDS} seed(s). "
+      f"(use --seeds N to change; 5–10 recommended for final tables)")
 
 # ── Sweep τ ──────────────────────────────────────────────────────────────────
 TAU_GRID = [1.0, 1.5, 2.0, 2.5, 3.0]
 print("\n[1/3] Sweeping τ (outlier threshold)...")
 tau_rows = []
 for tau in TAU_GRID:
-    acc, f1 = run_ours(tau=tau, alpha=ALPHA_DEFAULT, delta=DELTA_DEFAULT)
-    tag = " ← default" if tau == TAU_DEFAULT else ""
-    print(f"  τ={tau:.1f}  Acc={acc}%  F1={f1}%{tag}")
-    tau_rows.append({'τ': tau, 'Accuracy (%)': acc, 'F1 (%)': f1})
+    am, asd, fm, fsd = run_ours(tau=tau, alpha=ALPHA_DEFAULT, delta=DELTA_DEFAULT)
+    marker = " ← default" if tau == TAU_DEFAULT else ""
+    print(f"  τ={tau:.1f}  Acc={am}±{asd}%  F1={fm}±{fsd}%{marker}")
+    tau_rows.append({'τ': tau, 'Accuracy (%)': am, 'Acc_std': asd,
+                     'F1 (%)': fm, 'F1_std': fsd})
 pd.DataFrame(tau_rows).to_csv(tag('sensitivity_tau.csv'), index=False)
 
 # ── Sweep α ──────────────────────────────────────────────────────────────────
@@ -136,10 +158,11 @@ ALPHA_GRID = [0.5, 0.6, 0.7, 0.8, 0.9]
 print("\n[2/3] Sweeping α (trust decay factor)...")
 alpha_rows = []
 for alpha in ALPHA_GRID:
-    acc, f1 = run_ours(tau=TAU_DEFAULT, alpha=alpha, delta=DELTA_DEFAULT)
-    tag = " ← default" if alpha == ALPHA_DEFAULT else ""
-    print(f"  α={alpha:.1f}  Acc={acc}%  F1={f1}%{tag}")
-    alpha_rows.append({'α': alpha, 'Accuracy (%)': acc, 'F1 (%)': f1})
+    am, asd, fm, fsd = run_ours(tau=TAU_DEFAULT, alpha=alpha, delta=DELTA_DEFAULT)
+    marker = " ← default" if alpha == ALPHA_DEFAULT else ""
+    print(f"  α={alpha:.1f}  Acc={am}±{asd}%  F1={fm}±{fsd}%{marker}")
+    alpha_rows.append({'α': alpha, 'Accuracy (%)': am, 'Acc_std': asd,
+                       'F1 (%)': fm, 'F1_std': fsd})
 pd.DataFrame(alpha_rows).to_csv(tag('sensitivity_alpha.csv'), index=False)
 
 # ── Sweep δ ──────────────────────────────────────────────────────────────────
@@ -147,10 +170,11 @@ DELTA_GRID = [0.10, 0.15, 0.20, 0.25, 0.30]
 print("\n[3/3] Sweeping δ (Kappa detection threshold)...")
 delta_rows = []
 for delta in DELTA_GRID:
-    acc, f1 = run_ours(tau=TAU_DEFAULT, alpha=ALPHA_DEFAULT, delta=delta)
-    tag = " ← default" if delta == DELTA_DEFAULT else ""
-    print(f"  δ={delta:.2f}  Acc={acc}%  F1={f1}%{tag}")
-    delta_rows.append({'δ': delta, 'Accuracy (%)': acc, 'F1 (%)': f1})
+    am, asd, fm, fsd = run_ours(tau=TAU_DEFAULT, alpha=ALPHA_DEFAULT, delta=delta)
+    marker = " ← default" if delta == DELTA_DEFAULT else ""
+    print(f"  δ={delta:.2f}  Acc={am}±{asd}%  F1={fm}±{fsd}%{marker}")
+    delta_rows.append({'δ': delta, 'Accuracy (%)': am, 'Acc_std': asd,
+                       'F1 (%)': fm, 'F1_std': fsd})
 pd.DataFrame(delta_rows).to_csv(tag('sensitivity_delta.csv'), index=False)
 
 # ── Summary table for LaTeX ──────────────────────────────────────────────────

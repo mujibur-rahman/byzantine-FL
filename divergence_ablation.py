@@ -329,7 +329,7 @@ def main():
         f.write("\\bottomrule\n\\end{tabular}\n\\end{table}\n")
 
     print(f"\nWrote {cfg.out}.csv and {cfg.out}.tex")
-    #print("Reminder: run with --data <real NYC-TLC X,y> before using in the paper.")
+    print("Reminder: run with --data <real NYC-TLC X,y> before using in the paper.")
 
 
 if __name__ == "__main__":

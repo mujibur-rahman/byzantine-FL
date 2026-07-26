@@ -45,6 +45,7 @@ def build_federation(X, y, scaler, X_val, y_val,
                      batch_size=32,
                      async_mode=False,
                      max_staleness=5,
+                     staleness_corrected_kappa=True,
                      tau=2.0, alpha_trust=0.8, delta=0.2,
                      seed=42):
     """
@@ -117,6 +118,7 @@ def build_federation(X, y, scaler, X_val, y_val,
         lr               = lr,
         async_mode       = async_mode,
         max_staleness    = max_staleness,
+        staleness_corrected_kappa = staleness_corrected_kappa,
     )
 
     n_byz_str = f"{n_byzantine} Byzantine [{attack_type}]"
@@ -213,6 +215,127 @@ def run_federation(server, clients, byzantine_ids,
                   f"κ̄={metrics['mean_kappa']:.3f} | "
                   f"Agg={metrics['agg_time_ms']:.1f}ms")
 
+    return history
+
+
+# ── Run buffered semi-async FL (FedBuff) ──────────────────────────────────────
+def run_federation_async(server, clients, byzantine_ids,
+                         n_rounds=50,
+                         concurrency=None,
+                         arrivals_per_tick=None,
+                         max_delay=3,
+                         p_churn=0.0,
+                         verbose=True,
+                         seed=42):
+    """
+    Buffered semi-asynchronous FL (FedBuff-style).
+
+    Unlike run_federation (which trains one synchronous cohort per round),
+    here clients train on whatever global *version* they last received and
+    their updates arrive after a random delay. The server buffers arrivals
+    and performs an aggregation ("model version bump") once `concurrency`
+    updates have accumulated, down-weighting each update by its staleness
+    (server-model versions elapsed since it trained) via the aggregator's
+    staleness term. This models the trusted-then-defector / lagging-worker
+    dynamics of spatial-crowdsourcing far better than sync FL.
+
+    Requires server.async_mode = True (staleness weighting + staleness-based
+    rejection beyond server.max_staleness are only active in async mode).
+
+    Parameters
+    ----------
+    concurrency       : updates to buffer before an aggregation
+                        (default: server.clients_per_round)
+    arrivals_per_tick : new clients dispatched each simulation tick
+                        (default: concurrency)
+    max_delay         : max arrival delay in ticks (staleness spread)
+    n_rounds          : number of aggregations (global-model versions) to run
+
+    Returns
+    -------
+    history : list of per-round metric dicts (same schema as run_federation,
+              each also carrying mean/max staleness of the aggregated batch)
+    """
+    if not server.async_mode:
+        raise ValueError(
+            "run_federation_async requires server.async_mode=True "
+            "(build_federation(..., async_mode=True)).")
+
+    K = concurrency or server.clients_per_round
+    arrivals_per_tick = arrivals_per_tick or K
+
+    byz_pool = [c for c in clients if c.client_id in byzantine_ids]
+    ben_pool = [c for c in clients if c.client_id not in byzantine_ids]
+    byz_frac = len(byz_pool) / max(len(clients), 1)
+
+    history   = []
+    in_flight = []          # updates computed but not yet 'arrived'
+    tick      = 0
+    # generous tick budget so we can always reach n_rounds aggregations
+    max_ticks = n_rounds * (max_delay + 2) + 100
+
+    while len(history) < n_rounds and tick < max_ticks:
+        rng = np.random.RandomState(seed + tick)
+
+        # ── 1. Dispatch new participants on the CURRENT global version ────
+        n_byz = max(0, int(round(arrivals_per_tick * byz_frac)))
+        n_ben = arrivals_per_tick - n_byz
+        picks = []
+        if ben_pool and n_ben:
+            picks += [ben_pool[i] for i in
+                      rng.choice(len(ben_pool), min(n_ben, len(ben_pool)),
+                                 replace=False)]
+        if byz_pool and n_byz:
+            picks += [byz_pool[i] for i in
+                      rng.choice(len(byz_pool), min(n_byz, len(byz_pool)),
+                                 replace=False)]
+
+        server.broadcast(picks)                       # tags round_number=version
+        for c in picks:
+            if p_churn > 0 and not c.is_available(1 - p_churn, rng):
+                continue
+            update = c.local_train_and_submit()
+            if update is None:
+                continue
+            delay = int(rng.randint(0, max_delay + 1))
+            in_flight.append({
+                'client_id':       c.client_id,
+                'update':          update,
+                'sent_at_version': server.round,       # global version trained on
+                'arrival_tick':    tick + delay,
+            })
+
+        # ── 2. Deliver everything that has 'arrived' into the buffer ─────
+        still = []
+        for item in in_flight:
+            if item['arrival_tick'] <= tick:
+                # receive_update computes staleness = server.round - sent_at
+                server.receive_update(item['client_id'], item['update'],
+                                      sent_at_round=item['sent_at_version'])
+            else:
+                still.append(item)
+        in_flight = still
+
+        # ── 3. Aggregate once enough updates have buffered ───────────────
+        if len(server._async_buffer) >= K:
+            stale_batch = [b['staleness'] for b in server._async_buffer]
+            metrics = server.aggregate()              # bumps server.round
+            if metrics is not None:
+                metrics['mean_staleness'] = round(float(np.mean(stale_batch)), 2)
+                metrics['max_staleness']  = int(np.max(stale_batch))
+                history.append(metrics)
+                if verbose and (len(history) % 10 == 0 or len(history) == n_rounds):
+                    print(f"  Agg {len(history):3d} | "
+                          f"Acc={metrics['accuracy']:5.1f}% | "
+                          f"F1={metrics['f1']:5.1f}% | "
+                          f"Flagged={metrics['n_flagged']}/{metrics['n_updates']} | "
+                          f"stale μ={metrics['mean_staleness']} "
+                          f"max={metrics['max_staleness']}")
+        tick += 1
+
+    if len(history) < n_rounds and verbose:
+        print(f"  [async] stopped early: {len(history)}/{n_rounds} aggregations "
+              f"after {tick} ticks (raise arrivals_per_tick or lower concurrency)")
     return history
 
 

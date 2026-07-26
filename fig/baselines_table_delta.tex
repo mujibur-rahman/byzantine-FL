@@ -1,0 +1,14 @@
+\begin{table}[t]\centering\small
+\caption{F1 gap of Ours vs.\ the \emph{best} baseline per cell ($\Delta$F1 $=$ Ours $-\max_{\text{baseline}}$), 20\% Byzantine, real data. Positive (\textbf{bold}) $=$ Ours best.}
+\label{tab:ours_delta}
+\begin{tabular}{lcccc}
+\toprule
+Dataset & Grad-poison & GPS-spoof & Label-flip & On-off \\
+\midrule
+NYC-Taxi & -1.9 & -2.0 & -1.1 & -0.9 \\
+Foursquare & -2.1 & \textbf{+7.0} & \textbf{+12.6} & -7.0 \\
+Yelp & -43.2 & \textbf{+9.6} & \textbf{+2.2} & -12.1 \\
+Geolife & \textbf{+19.3} & \textbf{+20.5} & +0.0 & +0.0 \\
+\bottomrule
+\end{tabular}
+\end{table}

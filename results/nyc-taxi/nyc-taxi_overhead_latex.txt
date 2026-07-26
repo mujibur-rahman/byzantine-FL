@@ -8,13 +8,13 @@
 \toprule
 \textbf{Method} & \textbf{Avg Time (ms)} & \textbf{Overhead (×FedAvg)} & \textbf{Complexity} \\
 \midrule
-FedAvg & 0.29 & 1.0 & \texttt{O(nd)} \\
-Multi-Krum & 2.35 & 8.08 & \texttt{O(n²d)} \\
-TrimmedMean & 0.1 & 0.34 & \texttt{O(nd log n)} \\
-Bulyan & 2.31 & 7.94 & \texttt{O(n²d)} \\
-RFVIR & 0.94 & 3.24 & \texttt{O(nd)} \\
-FLAME & 40.32 & 138.63 & \texttt{O(nd + n² )} \\
-\textbf{Ours} & 63.83 & 219.45 & \texttt{O(nd + n·m)} \\
+FedAvg & 0.09 & 1.0 & \texttt{O(nd)} \\
+Multi-Krum & 0.79 & 9.1 & \texttt{O(n²d)} \\
+TrimmedMean & 0.05 & 0.59 & \texttt{O(nd log n)} \\
+Bulyan & 0.81 & 9.34 & \texttt{O(n²d)} \\
+RFVIR & 0.3 & 3.5 & \texttt{O(nd)} \\
+FLAME & 33.05 & 379.83 & \texttt{O(nd + n² )} \\
+\textbf{Ours} & 34.85 & 400.59 & \texttt{O(nd + n·m)} \\
 \bottomrule
 \end{tabular}
 \vspace{1mm}

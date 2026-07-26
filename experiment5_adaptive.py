@@ -173,7 +173,7 @@ def run_adaptive(attack_variant, n_rounds=N_ROUNDS, t_burn=T_BURN):
             z_scores = np.abs((norms - norms.mean()) / norms.std())
 
         # ── Per-client Layer 2 & 3 ────────────────────────────────────────
-        agg_update  = np.zeros(n_features + 1)
+        agg_update  = np.zeros(len(global_params))
         weight_sum  = 0.0
 
         for idx, (cid, update, is_byz_gt) in enumerate(updates_weighted):
@@ -296,7 +296,7 @@ for variant, desc in variants.items():
     rdf, cdf = run_adaptive(variant, N_ROUNDS, T_BURN)
     all_results[variant] = (rdf, cdf)
 
-    rdf.to_csv(tag(f'adaptive_{variant}.csv'), index=False)
+    rdf.to_csv(tag(f'{DATASET_NAME}_adaptive_{variant}.csv'), index=False)
 
     lat = detection_latency(rdf, T_BURN)
     acc_at_activation = rdf[rdf['round'] == T_BURN]['accuracy'].values
@@ -323,7 +323,7 @@ for variant, desc in variants.items():
     })
 
 lat_df = pd.DataFrame(latency_rows)
-lat_df.to_csv(tag('adaptive_detection_latency.csv'), index=False)
+lat_df.to_csv(tag(f'{DATASET_NAME}_adaptive_detection_latency.csv'), index=False)
 
 # ── LaTeX output ──────────────────────────────────────────────────────────────
 latex_table = r"""
