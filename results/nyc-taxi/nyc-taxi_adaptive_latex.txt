@@ -10,9 +10,9 @@
 \textbf{Attack Variant} & \textbf{Outlier} & \textbf{Trust} & \textbf{Kappa} & \textbf{Combined} & \textbf{Burn-in FPR} & \textbf{Final Acc} \\
  & latency & latency & latency & latency & (\%) & (\%) \\
 \midrule
-Sleeper (delayed activation, T_burn=20) & Never & Never & \textbf{13} & 13 & 62.5 & 94.0 \\
-Mimicry (gradient-constrained poisoning) & Never & Never & \textbf{Never} & Never & 7.5 & 96.3 \\
-Slow drift (ramp 5%/round to 40% flip) & Never & Never & \textbf{Never} & Never & 11.8 & 97.5 \\
+Sleeper (delayed activation, T_burn=20) & Never & Never & \textbf{0} & 0 & 11.2 & 95.8 \\
+Mimicry (gradient-constrained poisoning) & Never & Never & \textbf{Never} & Never & 13.7 & 95.6 \\
+Slow drift (ramp 5%/round to 40% flip) & Never & Never & \textbf{2} & 2 & 13.4 & 97.6 \\
 \bottomrule
 \end{tabular}
 \vspace{1mm}

@@ -1,0 +1,8 @@
+method,final_acc,round@90%,round@85%,auc
+FedAvg,90.7,4,5.0,88.2
+TrimmedMean,90.4,2,3.0,88.9
+RFVIR,90.4,6,7.0,86.2
+Multi-Krum,89.7,5,7.0,84.9
+Bulyan,90.1,6,6.0,86.2
+FLAME,90.7,6,6.0,87.2
+Ours,59.5,0,,59.8

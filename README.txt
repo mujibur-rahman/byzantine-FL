@@ -26,3 +26,6 @@ python3 experiment4_overhead.py
 
 ####
 python3 experiment5_adaptive.py  --dataset yelp --data .\data\divergence-ds\yelp_real100000.csv
+
+####
+python3 adaptive_figures.py --csv NYC-Taxi=results/nyc-taxi/nyc-taxi_adaptive_detection_latency.csv Foursquare=results/foursquare/foursquare_adaptive_detection_latency.csv Yelp=results/yelp/yelp_adaptive_detection_latency.csv         Geolife=results/geolife/geolife_adaptive_detection_latency.csv --out fig/adaptive

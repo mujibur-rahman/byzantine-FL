@@ -176,13 +176,19 @@ class MultiLayerAggregator:
     """
 
     def __init__(self, n_clients, tau=2.0, alpha=0.8, delta=0.2,
-                 trust_decay=0.05, trust_reward=0.05, trust_thresh=0.3):
+                 trust_decay=0.05, trust_reward=0.05, trust_thresh=0.3,
+                 kappa_val_size=500):
         self.tau         = tau          # outlier z-score threshold
         self.alpha       = alpha        # EMA trust decay
         self.delta       = delta        # Kappa threshold
         self.trust_decay = trust_decay
         self.trust_reward= trust_reward
         self.trust_thresh= trust_thresh
+        # Kappa is evaluated on a fixed random subsample of D_val of this size
+        # (the layer cost is n inferences over the val set; subsampling cuts the
+        # dominant overhead constant with negligible detection impact). None or
+        # 0 => use the full validation set.
+        self.kappa_val_size = kappa_val_size
         self.trust_scores = np.ones(n_clients) * 0.5
         self.n_clients   = n_clients
 
@@ -213,6 +219,18 @@ class MultiLayerAggregator:
         n_feat = len(global_params) - 1
         n = len(updates)
 
+        # ── Subsample D_val for the Kappa layer (overhead reduction) ──────
+        # The Kappa layer runs n inferences over the validation set, so its
+        # cost is O(n * |D_val|). A fixed random subsample keeps detection
+        # essentially unchanged while cutting that constant.
+        Xk, yk = X_val, y_val
+        if (X_val is not None and self.kappa_val_size
+                and len(X_val) > self.kappa_val_size):
+            idx = np.random.RandomState(0).choice(
+                len(X_val), self.kappa_val_size, replace=False)
+            Xk = X_val[idx]
+            yk = None if y_val is None else y_val[idx]
+
         # ── Layer 1: Outlier detection ────────────────────────────────────
         norms = np.array([np.linalg.norm(u) for u in updates])
         if norms.std() < 1e-10:
@@ -232,17 +250,23 @@ class MultiLayerAggregator:
             # ref_params_list is supplied (staleness-corrected), else current.
             base = (ref_params_list[j] if ref_params_list is not None
                     else global_params)
-            candidate_params = base + lr * u
-            kappa = compute_kappa(candidate_params, base, X_val, scaler)
+            # Kappa on the client's ACTUAL local model (base + full update),
+            # not a tiny lr-scaled step. The lr-scaled candidate sits ~on top
+            # of `base`, so its predictions barely move and kappa saturates
+            # near 1 for everyone — making delta inert. Using the full model
+            # exposes the client's real prediction-space divergence.
+            candidate_params = base + u
+            kappa = compute_kappa(candidate_params, base, Xk, scaler)
             kappas.append(kappa)
 
-            # Trust update
-            if outlier_flags[j] or kappa < self.delta:
-                self.trust_scores[cid] = max(
-                    0.0, self.trust_scores[cid] - self.trust_decay)
-            else:
-                self.trust_scores[cid] = min(
-                    1.0, self.trust_scores[cid] + self.trust_reward)
+            # ── Layer 2: EMA trust  T_i <- alpha*T_i + (1-alpha)*S_i ──────
+            # S_i is the per-round honesty signal (1 = passed outlier & kappa
+            # gates this round, 0 = flagged). alpha controls how fast trust
+            # integrates the signal (paper Sec IV.C); a persistently low-kappa
+            # client's trust decays below trust_thresh and is excluded.
+            S = 0.0 if (outlier_flags[j] or kappa < self.delta) else 1.0
+            self.trust_scores[cid] = (self.alpha * self.trust_scores[cid]
+                                      + (1.0 - self.alpha) * S)
 
             # Aggregation weight
             if outlier_flags[j] or self.trust_scores[cid] < self.trust_thresh:

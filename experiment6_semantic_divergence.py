@@ -60,8 +60,10 @@ NONIID_ALPHA      = 0.5
 BYZANTINE_RATIO   = 0.20
 VAL_SIZE          = 2000
 SEED              = 42
-DELTA             = 0.2    # Kappa threshold
+DELTA             = 0.2    # Kappa threshold (legacy; detection now peer-relative)
 TAU               = 2.0    # outlier z-score threshold
+KAPPA_VAL_SIZE    = 500    # subsample of D_val for the kappa check
+K_MAD             = 1.5    # peer-relative flag: kappa < median - K_MAD*1.4826*MAD
 
 np.random.seed(SEED)
 
@@ -161,44 +163,54 @@ def run_divergence_analysis(attack_type):
         else:
             z_scores = np.zeros(len(norms))
 
-        # ── Global model predictions on D_val ─────────────────────────
+        # ── Global model predictions on D_val (kappa on a subsample) ──
+        if len(X_val) > KAPPA_VAL_SIZE:
+            _ki = np.random.RandomState(0).choice(
+                len(X_val), KAPPA_VAL_SIZE, replace=False)
+            Xk = X_val[_ki]
+        else:
+            Xk = X_val
         gm = FLNeuralNet(n_features)
         gm.set_params(global_params.copy())
-        pred_global   = gm.predict(X_val)
+        pred_global    = gm.predict(Xk)
         p_fraud_global = pred_global.mean()   # fraction predicted fraud
 
-        # ── Per-client semantic divergence analysis ───────────────────
+        # ── Pass 1: per-client Kappa on the client's ACTUAL local model ──
+        # candidate = global + update (full model), NOT global + LR*update:
+        # the lr-scaled step barely moves predictions, so kappa saturates
+        # near 1 and only huge (grad-poison) updates register. The full model
+        # exposes real prediction-space divergence for label/semantic attacks.
+        kappas, shifts, gdists, pfc = [], [], [], []
+        for update in updates:
+            cm = FLNeuralNet(n_features)
+            cm.set_params(global_params + update)
+            pred_client = cm.predict(Xk)
+            if (len(np.unique(pred_client)) > 1 and
+                    len(np.unique(pred_global)) > 1):
+                k = cohen_kappa_score(pred_global, pred_client)
+            else:
+                k = 1.0 if np.array_equal(pred_client, pred_global) else 0.0
+            kappas.append(k)
+            pfc.append(pred_client.mean())
+            shifts.append(abs(pred_client.mean() - p_fraud_global))
+            gdists.append(np.linalg.norm(update - w_med))
+        kappas = np.array(kappas)
+        # Peer-relative lower-tail flag (removes per-round convergence shift).
+        _med = np.median(kappas)
+        _mad = np.median(np.abs(kappas - _med)) + 1e-9
+        kappa_flag = kappas < (_med - K_MAD * 1.4826 * _mad)
+
+        # ── Pass 2: record + aggregate ────────────────────────────────
         agg_update = np.zeros(len(global_params))
         weight_sum = 0.0
 
         for idx, (update, is_byz_gt) in enumerate(
                 zip(updates, is_byz_flags)):
-
-            # Apply update to get candidate model
-            candidate_params = global_params + LR * update
-            cm = FLNeuralNet(n_features)
-            cm.set_params(candidate_params)
-
-            # Client model predictions on D_val
-            pred_client   = cm.predict(X_val)
-            p_fraud_client = pred_client.mean()
-
-            # ── Kappa: prediction-level agreement ────────────────────
-            if (len(np.unique(pred_client)) > 1 and
-                    len(np.unique(pred_global)) > 1):
-                kappa = cohen_kappa_score(pred_global, pred_client)
-            else:
-                kappa = 1.0 if np.array_equal(pred_client,
-                                               pred_global) else 0.0
-
-            # ── Semantic shift: divergence in fraud prediction rate ──
-            semantic_shift = abs(p_fraud_client - p_fraud_global)
-
-            # ── Gradient distance from median ────────────────────────
-            gradient_dist = np.linalg.norm(update - w_med)
-
-            # ── Flags ────────────────────────────────────────────────
-            flagged_kappa    = kappa < DELTA
+            kappa            = float(kappas[idx])
+            p_fraud_client   = pfc[idx]
+            semantic_shift   = shifts[idx]
+            gradient_dist    = gdists[idx]
+            flagged_kappa    = bool(kappa_flag[idx])
             flagged_gradient = z_scores[idx] > TAU
 
             records.append({
@@ -255,7 +267,7 @@ for attack in ATTACK_TYPES:
     # = byzantine clients with LOW gradient distance but HIGH semantic shift
     low_grad_high_kappa_miss = byz[
         (byz['z_score'] <= TAU) &    # passed gradient filter
-        (byz['kappa'] < DELTA)       # caught by Kappa
+        (byz['flagged_kappa'])       # caught by Kappa (peer-relative)
     ]
     kappa_unique_detections = len(low_grad_high_kappa_miss)
     total_byz_samples       = len(byz)

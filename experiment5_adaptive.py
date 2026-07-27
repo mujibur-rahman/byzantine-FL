@@ -68,6 +68,8 @@ DELTA        = 0.2
 TRUST_THRESH = 0.3
 TRUST_DECAY  = 0.05
 TRUST_REWARD = 0.05
+KAPPA_VAL_SIZE = 500     # subsample of D_val for the kappa check (overhead)
+K_MAD          = 1.5     # peer-relative flag: kappa < median - K_MAD*1.4826*MAD
 
 np.random.seed(SEED)
 
@@ -172,6 +174,26 @@ def run_adaptive(attack_variant, n_rounds=N_ROUNDS, t_burn=T_BURN):
         else:
             z_scores = np.abs((norms - norms.mean()) / norms.std())
 
+        # ── Layer 3: Kappa on each client's FULL local model, peer-relative ──
+        # Subsample D_val for the kappa check (overhead reduction).
+        if len(X_val) > KAPPA_VAL_SIZE:
+            _ki = np.random.RandomState(0).choice(
+                len(X_val), KAPPA_VAL_SIZE, replace=False)
+            Xk = X_val[_ki]
+        else:
+            Xk = X_val
+        # Pass 1: kappa of the client's ACTUAL local model (global + update) vs
+        # the global model — the un-saturated semantic-divergence signal.
+        kappas_round = np.array([
+            compute_kappa(global_params + update, global_params, Xk, scaler)
+            for _, update, _ in updates_weighted])
+        # Peer-relative lower-tail flag: suspicious if kappa is well below the
+        # round's peer median (robust z via MAD). This removes the convergence-
+        # level shift that made an absolute delta over/under-flag each round.
+        _med = np.median(kappas_round)
+        _mad = np.median(np.abs(kappas_round - _med)) + 1e-9
+        kappa_flag = kappas_round < (_med - K_MAD * 1.4826 * _mad)
+
         # ── Per-client Layer 2 & 3 ────────────────────────────────────────
         agg_update  = np.zeros(len(global_params))
         weight_sum  = 0.0
@@ -180,10 +202,9 @@ def run_adaptive(attack_variant, n_rounds=N_ROUNDS, t_burn=T_BURN):
             # Layer 1
             outlier = bool(z_scores[idx] > TAU)
 
-            # Layer 3: Kappa (stateless — recomputed fresh every round)
-            candidate = global_params + LR * update
-            kappa = compute_kappa(candidate, global_params, X_val, scaler)
-            low_kappa = kappa < DELTA
+            # Layer 3: peer-relative Kappa flag (stateless, recomputed each round)
+            kappa = float(kappas_round[idx])
+            low_kappa = bool(kappa_flag[idx])
 
             # Layer 2: trust update
             if outlier or low_kappa:
@@ -296,7 +317,7 @@ for variant, desc in variants.items():
     rdf, cdf = run_adaptive(variant, N_ROUNDS, T_BURN)
     all_results[variant] = (rdf, cdf)
 
-    rdf.to_csv(tag(f'{DATASET_NAME}_adaptive_{variant}.csv'), index=False)
+    rdf.to_csv(tag(f'adaptive_{variant}.csv'), index=False)
 
     lat = detection_latency(rdf, T_BURN)
     acc_at_activation = rdf[rdf['round'] == T_BURN]['accuracy'].values
@@ -323,7 +344,7 @@ for variant, desc in variants.items():
     })
 
 lat_df = pd.DataFrame(latency_rows)
-lat_df.to_csv(tag(f'{DATASET_NAME}_adaptive_detection_latency.csv'), index=False)
+lat_df.to_csv(tag('adaptive_detection_latency.csv'), index=False)
 
 # ── LaTeX output ──────────────────────────────────────────────────────────────
 latex_table = r"""

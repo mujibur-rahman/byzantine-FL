@@ -1,0 +1,33 @@
+\begin{table}[htbp]
+\centering
+\scriptsize
+\caption{Semantic Divergence Analysis: Cohen's $\kappa$ vs Gradient Distance
+per Attack Type (20\% Byzantine, foursquare, last 10 rounds)}
+\label{tab:semantic_divergence}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lcccc|cc|c}
+\toprule
+& \multicolumn{2}{c}{\textbf{Cohen's $\kappa$}}
+& \multicolumn{2}{c|}{\textbf{Semantic Shift}}
+& \multicolumn{2}{c|}{\textbf{Gradient Distance}}
+& \textbf{Kappa-only} \\
+\textbf{Attack}
+& Byz & Ben & Byz & Ben & Byz & Ben & \textbf{Det. (\%)} \\
+\midrule
+grad-p & 0.02 & 0.174 & 0.367 & 0.203 & 4124.932 & 8.797 & \textbf{7.5\%} \\
+spf & 0.217 & 0.217 & 0.21 & 0.211 & 10.167 & 8.335 & \textbf{0.0\%} \\
+lfp & 0.265 & 0.26 & 0.186 & 0.209 & 9.231 & 8.49 & \textbf{0.0\%} \\
+ooa & 0.307 & 0.267 & 0.139 & 0.212 & 9.476 & 8.461 & \textbf{0.0\%} \\
+\bottomrule
+\end{tabular}
+\vspace{1mm}
+\begin{minipage}{0.48\textwidth}
+\scriptsize
+\textbf{Semantic Shift} = $|p^{\text{fraud}}_{\text{client}} -
+p^{\text{fraud}}_{\text{global}}|$: difference in fraud prediction
+rate on $\mathcal{D}_{val}$.
+\textbf{Kappa-only Det.} = Byzantine clients that passed the gradient
+filter ($z$-score $\leq \tau$) yet were caught by Kappa ($\kappa_i < \delta$),
+directly validating Corollary~1.
+\end{minipage}
+\end{table}

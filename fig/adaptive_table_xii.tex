@@ -1,0 +1,25 @@
+\begin{table*}[t]\centering\small
+\caption{Adaptive-adversary detection latency (rounds after activation; lower is better, `--' = never) under a stateless Kappa layer vs.\ the stateful trust layer, with burn-in false-positive rate and final accuracy. $\dagger$ marks results that are not interpretable: burn-in FPR $>20\%$ (detector saturated) or final accuracy $<75\%$ (model did not converge).}
+\label{tab:adaptive}
+\begin{tabular}{llcccccc}
+\toprule
+Dataset & Variant & Outlier & Trust & \textbf{Kappa} & Combined & Burn-in FPR & Final Acc \\
+\midrule
+NYC-Taxi & Sleeper & Never & Never & \textbf{0} & 0 & 11.2\% & 95.8\% \\
+ & Mimicry & Never & Never & Never & Never & 13.7\% & 95.6\% \\
+ & Slow-drift & Never & Never & \textbf{2} & 2 & 13.4\% & 97.6\% \\
+\midrule
+Foursquare & Sleeper$^\dagger$ & Never & Never & Never & Never & 6.9\% & 65.1\% \\
+ & Mimicry$^\dagger$ & Never & Never & Never & Never & 29.5\% & 90.2\% \\
+ & Slow-drift$^\dagger$ & Never & Never & Never & Never & 7.9\% & 67.1\% \\
+\midrule
+Yelp & Sleeper & Never & Never & \textbf{1} & 1 & 12.3\% & 98.0\% \\
+ & Mimicry & Never & Never & Never & Never & 10.4\% & 97.9\% \\
+ & Slow-drift & Never & Never & \textbf{11} & 11 & 7.2\% & 98.5\% \\
+\midrule
+Geolife & Sleeper & Never & 33 & \textbf{2} & 0 & 16.1\% & 96.4\% \\
+ & Mimicry$^\dagger$ & Never & Never & Never & Never & 0.3\% & 63.0\% \\
+ & Slow-drift & Never & 34 & \textbf{4} & 4 & 14.2\% & 96.4\% \\
+\bottomrule
+\end{tabular}
+\end{table*}
