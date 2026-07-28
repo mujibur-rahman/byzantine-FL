@@ -189,6 +189,12 @@ class MultiLayerAggregator:
         # dominant overhead constant with negligible detection impact). None or
         # 0 => use the full validation set.
         self.kappa_val_size = kappa_val_size
+        # Peer-relative Kappa flag: a client is suspicious when its kappa is a
+        # lower-tail outlier among the round's peers (kappa < median -
+        # k_mad*1.4826*MAD). Dataset-agnostic — replaces the absolute delta,
+        # which never gated once kappa was un-saturated. delta is kept as a
+        # fallback when there are too few clients for a stable MAD.
+        self.k_mad       = 1.5
         self.trust_scores = np.ones(n_clients) * 0.5
         self.n_clients   = n_clients
 
@@ -243,39 +249,40 @@ class MultiLayerAggregator:
         weights = []
         kappas  = []
 
+        # ── Pass 1: Kappa on each client's ACTUAL local model (base + update),
+        # not a tiny lr-scaled step (which saturates kappa near 1 and makes the
+        # threshold inert). Reference is the version the client trained on when
+        # ref_params_list is supplied (staleness-corrected), else current.
         for j, (u, cid) in enumerate(zip(updates, client_ids)):
-            # Kappa: apply this client's update to the reference model, then
-            # measure prediction agreement against that same reference. The
-            # reference is the version the client trained on when
-            # ref_params_list is supplied (staleness-corrected), else current.
             base = (ref_params_list[j] if ref_params_list is not None
                     else global_params)
-            # Kappa on the client's ACTUAL local model (base + full update),
-            # not a tiny lr-scaled step. The lr-scaled candidate sits ~on top
-            # of `base`, so its predictions barely move and kappa saturates
-            # near 1 for everyone — making delta inert. Using the full model
-            # exposes the client's real prediction-space divergence.
-            candidate_params = base + u
-            kappa = compute_kappa(candidate_params, base, Xk, scaler)
-            kappas.append(kappa)
+            kappas.append(compute_kappa(base + u, base, Xk, scaler))
+        kappas = np.array(kappas)
 
-            # ── Layer 2: EMA trust  T_i <- alpha*T_i + (1-alpha)*S_i ──────
-            # S_i is the per-round honesty signal (1 = passed outlier & kappa
-            # gates this round, 0 = flagged). alpha controls how fast trust
-            # integrates the signal (paper Sec IV.C); a persistently low-kappa
-            # client's trust decays below trust_thresh and is excluded.
-            S = 0.0 if (outlier_flags[j] or kappa < self.delta) else 1.0
+        # Peer-relative lower-tail Kappa flag (dataset-agnostic). Falls back to
+        # the absolute delta when there are too few clients for a stable MAD.
+        if n >= 5:
+            med = np.median(kappas)
+            mad = np.median(np.abs(kappas - med)) + 1e-9
+            kappa_flag = kappas < (med - self.k_mad * 1.4826 * mad)
+        else:
+            kappa_flag = kappas < self.delta
+
+        # ── Pass 2: trust EMA + weight. Kappa DETECTS (via the flag), it does
+        # NOT scale honest clients — weighting unflagged clients by raw kappa
+        # penalises honest non-IID clients (kappa~0.5-0.7) and wrecks
+        # convergence. Unflagged clients are weighted by trust only.
+        for j, cid in enumerate(client_ids):
+            flagged = bool(outlier_flags[j] or kappa_flag[j])
+            S = 0.0 if flagged else 1.0
             self.trust_scores[cid] = (self.alpha * self.trust_scores[cid]
                                       + (1.0 - self.alpha) * S)
-
-            # Aggregation weight
-            if outlier_flags[j] or self.trust_scores[cid] < self.trust_thresh:
+            if flagged or self.trust_scores[cid] < self.trust_thresh:
                 weights.append(0.0)
             else:
-                weights.append(self.trust_scores[cid] * max(kappa, 0.0))
+                weights.append(self.trust_scores[cid])
 
         weights = np.array(weights)
-        kappas  = np.array(kappas)
 
         # ── Staleness weighting (buffered semi-async / FedBuff) ───────────
         if stalenesses is not None:
