@@ -1,0 +1,21 @@
+\begin{table*}[t]
+\centering
+\caption{Convergence speed of Byzantine-robust aggregators across the four spatial-crowdsourcing datasets (clean setting, 100 clients, 20 sampled per round, 50 rounds). \textbf{Acc.}: mean accuracy over the last five rounds. \textbf{R@90}: first round reaching 90\% of the method's own final accuracy (pure saturation speed). \textbf{R@85}: first round reaching 85\% absolute accuracy. \textbf{AUC}: mean accuracy across all rounds. Best per column per dataset in \textbf{bold}; lower is better for R@$\cdot$, higher for Acc./AUC. Geolife accuracy equals the majority-class baseline ($\approx$96.5\%; minority-class F1$\to$0 for every method), so its accuracy figures reflect trivial-classifier saturation rather than fraud learning (see text).}
+\label{tab:convergence}
+\small
+\begin{tabular}{lcccccccccccccccc}
+\toprule
+\textbf{Method} & \multicolumn{4}{c}{\textbf{NYC-Taxi}} & \multicolumn{4}{c}{\textbf{Foursquare}} & \multicolumn{4}{c}{\textbf{Yelp}} & \multicolumn{4}{c}{\textbf{Geolife}} \\
+ & Acc. & R@90 & R@85 & AUC & Acc. & R@90 & R@85 & AUC & Acc. & R@90 & R@85 & AUC & Acc. & R@90 & R@85 & AUC \\
+\midrule
+FedAvg & 96.2 & 3 & 3 & 92.4 & 90.7 & \textbf{4} & \textbf{5} & 88.2 & 98.5 & \textbf{3} & \textbf{3} & 95.9 & \textbf{96.5} & \textbf{2} & 2 & 95.3 \\
+TrimmedMean & 96.3 & 3 & 3 & 92.5 & 90.7 & \textbf{4} & \textbf{5} & \textbf{88.2} & 98.6 & \textbf{3} & \textbf{3} & 96.0 & \textbf{96.5} & \textbf{2} & 2 & 95.4 \\
+RFVIR & 96.0 & 3 & 3 & 91.9 & 90.5 & \textbf{4} & \textbf{5} & 87.6 & 97.9 & \textbf{3} & \textbf{3} & 95.5 & \textbf{96.5} & \textbf{2} & 2 & 95.3 \\
+Multi-Krum & 95.9 & 3 & \textbf{2} & \textbf{93.1} & 90.5 & 5 & \textbf{5} & 87.3 & 98.2 & \textbf{3} & \textbf{3} & 95.7 & \textbf{96.5} & 3 & 3 & 94.9 \\
+Bulyan & 95.2 & \textbf{2} & \textbf{2} & 92.2 & 90.5 & 5 & 6 & 87.3 & 98.3 & \textbf{3} & \textbf{3} & 95.5 & \textbf{96.5} & 3 & 2 & 95.1 \\
+FLAME & \textbf{96.8} & 3 & 3 & 92.1 & \textbf{90.7} & \textbf{4} & \textbf{5} & 87.9 & \textbf{98.6} & \textbf{3} & \textbf{3} & \textbf{96.5} & \textbf{96.5} & \textbf{2} & \textbf{1} & \textbf{95.6} \\
+\midrule
+\textbf{Ours} & 95.6 & 3 & 3 & 91.9 & 90.3 & \textbf{4} & \textbf{5} & 88.0 & 98.5 & \textbf{3} & \textbf{3} & 95.9 & \textbf{96.5} & \textbf{2} & 2 & 95.3 \\
+\bottomrule
+\end{tabular}
+\end{table*}

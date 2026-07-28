@@ -79,6 +79,11 @@ def run_curves(a):
 
     rows = []
     for method in a.methods:
+        # Reset the global RNG so every method starts from the SAME model
+        # init and client partition — otherwise FLNeuralNet's init (which draws
+        # from global numpy RNG) differs per method and the curves aren't
+        # comparable (a method can "lose" purely on a worse random start).
+        np.random.seed(42)
         server, clients, byz = build_federation(
             Xs, y, scaler, Xv, yv, n_clients=a.clients,
             clients_per_round=a.per_round, byzantine_ratio=br,
@@ -119,7 +124,7 @@ def summarise(df, out, thresh):
 
 
 def plot(df, out, thresh):
-    fig, ax = plt.subplots(figsize=(6.2, 3.8))
+    fig, ax = plt.subplots(figsize=(7.2, 4.8))
     for m in STYLE:
         sub = df[df.method == m].sort_values("round")
         if sub.empty: continue

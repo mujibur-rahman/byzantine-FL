@@ -195,6 +195,13 @@ class MultiLayerAggregator:
         # which never gated once kappa was un-saturated. delta is kept as a
         # fallback when there are too few clients for a stable MAD.
         self.k_mad       = 1.5
+        # Warm-up: for the first `warmup_rounds` aggregations the global model
+        # is still unstable, so kappa is noisy/degenerate and filtering does
+        # more harm than good (drops honest clients, slows convergence). During
+        # warm-up we skip the outlier/kappa flags and aggregate all clients
+        # (still by trust), then engage detection once the model has settled.
+        self.warmup_rounds = 5
+        self._agg_count    = 0
         self.trust_scores = np.ones(n_clients) * 0.5
         self.n_clients   = n_clients
 
@@ -267,6 +274,14 @@ class MultiLayerAggregator:
             kappa_flag = kappas < (med - self.k_mad * 1.4826 * mad)
         else:
             kappa_flag = kappas < self.delta
+
+        # ── Warm-up: while the global model is still unstable, kappa is noisy/
+        # degenerate, so filtering drops honest clients and slows convergence.
+        # Skip flagging for the first `warmup_rounds` aggregations.
+        self._agg_count += 1
+        if self._agg_count <= self.warmup_rounds:
+            outlier_flags = np.zeros(n, dtype=bool)
+            kappa_flag    = np.zeros(n, dtype=bool)
 
         # ── Pass 2: trust EMA + weight. Kappa DETECTS (via the flag), it does
         # NOT scale honest clients — weighting unflagged clients by raw kappa
