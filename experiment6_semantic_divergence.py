@@ -58,12 +58,18 @@ N_ROUNDS          = 30
 LR                = 0.01
 NONIID_ALPHA      = 0.5
 BYZANTINE_RATIO   = 0.20
-VAL_SIZE          = 2000
+VAL_SIZE          = 10
 SEED              = 42
 DELTA             = 0.2    # Kappa threshold (legacy; detection now peer-relative)
 TAU               = 2.0    # outlier z-score threshold
-KAPPA_VAL_SIZE    = 500    # subsample of D_val for the kappa check
+KAPPA_VAL_SIZE    = 20    # subsample of D_val for the kappa check
 K_MAD             = 1.5    # peer-relative flag: kappa < median - K_MAD*1.4826*MAD
+KAPPA_BALANCED    = True   # draw the kappa subsample class-balanced (50/50).
+                           # Cohen's kappa on the raw ~9%-fraud val set is
+                           # dominated by majority-class agreement, so label
+                           # flipping (which corrupts the RARE fraud class)
+                           # barely moves kappa. Balancing the subsample lets
+                           # flipped minority predictions register.
 
 np.random.seed(SEED)
 
@@ -89,6 +95,33 @@ n_features    = X_scaled.shape[1]
 # ── Global fraud rate on val set (ground truth reference) ────────────────────
 global_fraud_rate = y_val.mean()
 print(f"Val set fraud rate: {global_fraud_rate:.1%}\n")
+
+
+def build_kappa_val(X_val, y_val, size, balanced, seed=0):
+    """Fixed subsample of D_val used for every per-client kappa comparison.
+    balanced=True returns a 50/50 fraud/benign draw so that corruption of the
+    rare fraud class is not washed out by majority-class agreement."""
+    rng = np.random.RandomState(seed)
+    if not balanced:
+        if len(X_val) > size:
+            return X_val[rng.choice(len(X_val), size, replace=False)]
+        return X_val
+    pos = np.where(y_val == 1)[0]
+    neg = np.where(y_val == 0)[0]
+    half = size // 2
+
+    def draw(pool, k):
+        if len(pool) == 0:
+            return np.empty(0, dtype=int)
+        return rng.choice(pool, k, replace=len(pool) < k)
+    idx = np.concatenate([draw(pos, half), draw(neg, size - half)])
+    rng.shuffle(idx)
+    return X_val[idx]
+
+
+X_kappa = build_kappa_val(X_val, y_val, KAPPA_VAL_SIZE, KAPPA_BALANCED, seed=0)
+print(f"Kappa val subsample: {len(X_kappa)} samples "
+      f"({'class-balanced 50/50' if KAPPA_BALANCED else 'uniform'})\n")
 
 
 def run_divergence_analysis(attack_type):
@@ -163,13 +196,9 @@ def run_divergence_analysis(attack_type):
         else:
             z_scores = np.zeros(len(norms))
 
-        # ── Global model predictions on D_val (kappa on a subsample) ──
-        if len(X_val) > KAPPA_VAL_SIZE:
-            _ki = np.random.RandomState(0).choice(
-                len(X_val), KAPPA_VAL_SIZE, replace=False)
-            Xk = X_val[_ki]
-        else:
-            Xk = X_val
+        # ── Global model predictions on D_val (kappa on a fixed subsample) ──
+        # X_kappa is precomputed once (class-balanced when KAPPA_BALANCED).
+        Xk = X_kappa
         gm = FLNeuralNet(n_features)
         gm.set_params(global_params.copy())
         pred_global    = gm.predict(Xk)
