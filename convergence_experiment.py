@@ -79,59 +79,86 @@ def run_curves(a):
 
     rows = []
     for method in a.methods:
-        # Reset the global RNG so every method starts from the SAME model
-        # init and client partition — otherwise FLNeuralNet's init (which draws
-        # from global numpy RNG) differs per method and the curves aren't
-        # comparable (a method can "lose" purely on a worse random start).
-        np.random.seed(42)
-        server, clients, byz = build_federation(
-            Xs, y, scaler, Xv, yv, n_clients=a.clients,
-            clients_per_round=a.per_round, byzantine_ratio=br,
-            attack_type=attack, noniid_alpha=0.5, seed=42)
-        server.aggregator = AGGREGATOR_REGISTRY[method](n_clients=a.clients)
-        hist = run_federation(server, clients, set(byz), n_rounds=a.rounds,
-                              verbose=False, seed=42)
-        for h in hist:
-            rows.append({"method": method, "round": h["round"],
-                         "acc": h["accuracy"], "f1": h["f1"]})
-        fa = np.mean([h["accuracy"] for h in hist[-5:]]) if hist else 0.0
-        print(f"  {method:12s} final_acc={fa:5.1f}%  ({len(hist)} rounds)")
+        finals = []
+        for seed in a.seeds:
+            # Reseed per (method, seed): within a seed every method shares the
+            # SAME init/partition (comparable — no method loses on a worse random
+            # start); across seeds the varying init/partition/sampling give the
+            # repeated measurements needed for mean±std.
+            np.random.seed(seed)
+            server, clients, byz = build_federation(
+                Xs, y, scaler, Xv, yv, n_clients=a.clients,
+                clients_per_round=a.per_round, byzantine_ratio=br,
+                attack_type=attack, noniid_alpha=0.5, seed=seed)
+            server.aggregator = AGGREGATOR_REGISTRY[method](n_clients=a.clients)
+            hist = run_federation(server, clients, set(byz), n_rounds=a.rounds,
+                                  verbose=False, seed=seed)
+            for h in hist:
+                rows.append({"method": method, "seed": seed, "round": h["round"],
+                             "acc": h["accuracy"], "f1": h["f1"]})
+            finals.append(np.mean([h["accuracy"] for h in hist[-5:]]) if hist else 0.0)
+        print(f"  {method:12s} final_acc={np.mean(finals):5.1f}±{np.std(finals):.1f}%  "
+              f"({len(a.seeds)} seed(s))")
     df = pd.DataFrame(rows); df.to_csv(f"{a.out}_curves.csv", index=False)
     print(f"wrote {a.out}_curves.csv")
     return df
 
 
+def _metrics_one(sub, thresh):
+    """final_acc, round@90, round@thresh, auc for a single curve."""
+    sub = sub.sort_values("round")
+    acc = sub["acc"].values; rnd = sub["round"].values
+    if len(acc) == 0:
+        return None
+    final = float(np.mean(acc[-5:]))
+    tgt = 0.90 * final
+    r90 = next((float(rnd[i]) for i in range(len(acc)) if acc[i] >= tgt), np.nan)
+    rth = next((float(rnd[i]) for i in range(len(acc)) if acc[i] >= thresh), np.nan)
+    return final, r90, rth, float(np.mean(acc))
+
+
 def summarise(df, out, thresh):
+    seeds = sorted(df["seed"].unique()) if "seed" in df.columns else [None]
+    rcol = f"round@{thresh:.0f}%"
     rows = []
     for m in [x for x in STYLE if x in df["method"].unique()]:
-        sub = df[df.method == m].sort_values("round")
-        acc = sub["acc"].values; rnd = sub["round"].values
-        if len(acc) == 0:
+        per = []
+        for s in seeds:
+            sub = df[df.method == m] if s is None else df[(df.method == m) & (df.seed == s)]
+            r = _metrics_one(sub, thresh)
+            if r is not None:
+                per.append(r)
+        if not per:
             continue
-        final = float(np.mean(acc[-5:]))
-        # first round reaching 90% of own final
-        tgt = 0.90 * final
-        r90 = next((int(rnd[i]) for i in range(len(acc)) if acc[i] >= tgt), None)
-        # first round reaching absolute threshold
-        rth = next((int(rnd[i]) for i in range(len(acc)) if acc[i] >= thresh), None)
-        auc = float(np.mean(acc))
-        rows.append({"method": m, "final_acc": round(final, 1),
-                     "round@90%": r90, f"round@{thresh:.0f}%": rth,
-                     "auc": round(auc, 1)})
+        arr = np.array(per, float)                       # (n_seeds, 4)
+        mean = np.nanmean(arr, axis=0); std = np.nanstd(arr, axis=0)
+        multi = len(per) > 1
+        def cell(i, dec=1):
+            return f"{mean[i]:.{dec}f}±{std[i]:.{dec}f}" if multi else f"{mean[i]:.{dec}f}"
+        rows.append({"method": m, "final_acc": cell(0), "round@90%": cell(1),
+                     rcol: cell(2), "auc": cell(3)})
     s = pd.DataFrame(rows); s.to_csv(f"{out}_summary.csv", index=False)
     print("\n" + s.to_string(index=False)); print(f"\nwrote {out}_summary.csv")
     return s
 
 
 def plot(df, out, thresh):
+    multi = "seed" in df.columns and df["seed"].nunique() > 1
     fig, ax = plt.subplots(figsize=(7.2, 4.8))
     for m in STYLE:
-        sub = df[df.method == m].sort_values("round")
+        sub = df[df.method == m]
         if sub.empty: continue
+        g = sub.groupby("round")["acc"]
+        mean = g.mean()
         color, ls = STYLE[m]
         lw = 2.8 if m == "Ours" else 1.6
         z = 6 if m == "Ours" else 3
-        ax.plot(sub["round"], sub["acc"], ls, color=color, lw=lw, label=m, zorder=z)
+        ax.plot(mean.index, mean.values, ls, color=color, lw=lw, label=m, zorder=z)
+        if multi:
+            std = g.std(ddof=1).fillna(0.0)
+            ax.fill_between(mean.index, mean.values - std.values,
+                            mean.values + std.values, color=color, alpha=0.12,
+                            lw=0, zorder=z - 1)
     ax.axhline(thresh, ls=":", lw=1, color="#888888")
     ax.text(df["round"].max(), thresh + 0.6, f"{thresh:.0f}% threshold",
             ha="right", fontsize=8, color="#888888")
@@ -157,6 +184,8 @@ def main():
     ap.add_argument("--clients", type=int, default=100)
     ap.add_argument("--per-round", type=int, default=20, dest="per_round")
     ap.add_argument("--rounds", type=int, default=50)
+    ap.add_argument("--seeds", nargs="+", type=int, default=[42, 43, 44],
+                    help="seeds to average over; curves/metrics report mean±std")
     ap.add_argument("--thresh", type=float, default=85.0, help="absolute acc threshold %")
     ap.add_argument("--out", default="convergence")
     ap.add_argument("--replot", default=None)

@@ -1,21 +1,21 @@
 \begin{table*}[t]
 \centering
-\caption{Convergence speed of Byzantine-robust aggregators across the four spatial-crowdsourcing datasets (clean setting, 100 clients, 20 sampled per round, 50 rounds). \textbf{Acc.}: mean accuracy over the last five rounds. \textbf{R@90}: first round reaching 90\% of the method's own final accuracy (pure saturation speed). \textbf{R@85}: first round reaching 85\% absolute accuracy. \textbf{AUC}: mean accuracy across all rounds. Best per column per dataset in \textbf{bold}; lower is better for R@$\cdot$, higher for Acc./AUC. Geolife accuracy equals the majority-class baseline ($\approx$96.5\%; minority-class F1$\to$0 for every method), so its accuracy figures reflect trivial-classifier saturation rather than fraud learning (see text).}
+\caption{Convergence speed across the four datasets (clean setting, 100 clients, 20 sampled/round, 50 rounds; mean$\pm$s.d.\ over 3 seeds). \textbf{Acc.}: final accuracy (last-5-round mean). \textbf{R@90}: first round reaching 90\% of its own final accuracy. \textbf{AUC}: mean accuracy over all rounds. Large R@90 spreads reflect random-initialisation variance, not method instability; final accuracy and AUC are the stable metrics. Geolife accuracy equals the majority-class baseline (minority-class F1$\to$0).}
 \label{tab:convergence}
 \small
-\begin{tabular}{lcccccccccccccccc}
+\begin{tabular}{lcccccccccccc}
 \toprule
-\textbf{Method} & \multicolumn{4}{c}{\textbf{NYC-Taxi}} & \multicolumn{4}{c}{\textbf{Foursquare}} & \multicolumn{4}{c}{\textbf{Yelp}} & \multicolumn{4}{c}{\textbf{Geolife}} \\
- & Acc. & R@90 & R@85 & AUC & Acc. & R@90 & R@85 & AUC & Acc. & R@90 & R@85 & AUC & Acc. & R@90 & R@85 & AUC \\
+ & \multicolumn{3}{c}{\textbf{NYC-Taxi}} & \multicolumn{3}{c}{\textbf{Foursquare}} & \multicolumn{3}{c}{\textbf{Yelp}} & \multicolumn{3}{c}{\textbf{Geolife}} \\
+\textbf{Method} & Acc. & R@90 & AUC & Acc. & R@90 & AUC & Acc. & R@90 & AUC & Acc. & R@90 & AUC \\
 \midrule
-FedAvg & 96.2 & 3 & 3 & 92.4 & 90.7 & \textbf{4} & \textbf{5} & 88.2 & 98.5 & \textbf{3} & \textbf{3} & 95.9 & \textbf{96.5} & \textbf{2} & 2 & 95.3 \\
-TrimmedMean & 96.3 & 3 & 3 & 92.5 & 90.7 & \textbf{4} & \textbf{5} & \textbf{88.2} & 98.6 & \textbf{3} & \textbf{3} & 96.0 & \textbf{96.5} & \textbf{2} & 2 & 95.4 \\
-RFVIR & 96.0 & 3 & 3 & 91.9 & 90.5 & \textbf{4} & \textbf{5} & 87.6 & 97.9 & \textbf{3} & \textbf{3} & 95.5 & \textbf{96.5} & \textbf{2} & 2 & 95.3 \\
-Multi-Krum & 95.9 & 3 & \textbf{2} & \textbf{93.1} & 90.5 & 5 & \textbf{5} & 87.3 & 98.2 & \textbf{3} & \textbf{3} & 95.7 & \textbf{96.5} & 3 & 3 & 94.9 \\
-Bulyan & 95.2 & \textbf{2} & \textbf{2} & 92.2 & 90.5 & 5 & 6 & 87.3 & 98.3 & \textbf{3} & \textbf{3} & 95.5 & \textbf{96.5} & 3 & 2 & 95.1 \\
-FLAME & \textbf{96.8} & 3 & 3 & 92.1 & \textbf{90.7} & \textbf{4} & \textbf{5} & 87.9 & \textbf{98.6} & \textbf{3} & \textbf{3} & \textbf{96.5} & \textbf{96.5} & \textbf{2} & \textbf{1} & \textbf{95.6} \\
+FedAvg & 96.0$\pm$0.8 & 3.3$\pm$2.1 & 92.1$\pm$2.4 & 90.8$\pm$0.1 & 4.7$\pm$3.3 & 87.4$\pm$2.4 & 98.5$\pm$0.1 & 2.7$\pm$2.1 & 95.9$\pm$1.7 & 96.5$\pm$0.0 & 2.0$\pm$1.6 & 94.6$\pm$1.9 \\
+TrimmedMean & 96.2$\pm$0.7 & 3.3$\pm$2.1 & 92.2$\pm$2.4 & 90.8$\pm$0.1 & 5.0$\pm$3.7 & 87.4$\pm$2.5 & 98.6$\pm$0.1 & 2.7$\pm$2.1 & 95.9$\pm$1.7 & 96.5$\pm$0.0 & 2.0$\pm$1.6 & 94.6$\pm$1.9 \\
+RFVIR & 95.8$\pm$1.2 & 3.7$\pm$1.7 & 91.9$\pm$3.0 & 90.6$\pm$0.2 & 9.3$\pm$9.7 & 84.4$\pm$6.4 & 98.3$\pm$0.3 & 3.0$\pm$1.6 & 95.6$\pm$1.8 & 96.5$\pm$0.0 & 2.3$\pm$2.1 & 94.3$\pm$2.2 \\
+Multi-Krum & 96.1$\pm$0.1 & 3.7$\pm$2.5 & 92.1$\pm$2.7 & 90.4$\pm$0.2 & 7.0$\pm$6.7 & 86.1$\pm$3.6 & 98.3$\pm$0.1 & 3.0$\pm$2.4 & 95.4$\pm$2.0 & 96.5$\pm$0.0 & 3.0$\pm$2.4 & 94.1$\pm$2.3 \\
+Bulyan & 95.2$\pm$0.3 & 3.0$\pm$2.9 & 91.3$\pm$3.1 & 90.4$\pm$0.0 & 5.7$\pm$4.1 & 86.7$\pm$2.8 & 98.4$\pm$0.1 & 2.7$\pm$2.1 & 95.5$\pm$1.9 & 96.5$\pm$0.0 & 3.3$\pm$2.9 & 93.7$\pm$2.9 \\
+FLAME & 96.3$\pm$1.0 & 3.0$\pm$1.6 & 91.9$\pm$2.5 & 90.7$\pm$0.2 & 3.7$\pm$2.9 & 87.8$\pm$1.9 & 98.7$\pm$0.1 & 2.7$\pm$2.1 & 96.3$\pm$1.6 & 96.5$\pm$0.0 & 2.0$\pm$1.6 & 94.7$\pm$1.8 \\
 \midrule
-\textbf{Ours} & 95.6 & 3 & 3 & 91.9 & 90.3 & \textbf{4} & \textbf{5} & 88.0 & 98.5 & \textbf{3} & \textbf{3} & 95.9 & \textbf{96.5} & \textbf{2} & 2 & 95.3 \\
+\textbf{Ours} & \textbf{95.4$\pm$0.8} & \textbf{3.0$\pm$1.6} & \textbf{91.5$\pm$2.4} & \textbf{90.5$\pm$0.1} & \textbf{4.7$\pm$3.3} & \textbf{87.2$\pm$2.2} & \textbf{98.5$\pm$0.1} & \textbf{2.7$\pm$2.1} & \textbf{95.9$\pm$1.7} & \textbf{96.5$\pm$0.0} & \textbf{2.0$\pm$1.6} & \textbf{94.6$\pm$1.9} \\
 \bottomrule
 \end{tabular}
 \end{table*}

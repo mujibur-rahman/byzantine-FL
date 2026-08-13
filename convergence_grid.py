@@ -63,15 +63,23 @@ def main():
     for idx, name in enumerate(names):
         ax = axes[idx // ncol][idx % ncol]
         df = data[name]
+        multi = "seed" in df.columns and df["seed"].nunique() > 1
         for m in STYLE:
-            sub = df[df.method == m].sort_values("round")
+            sub = df[df.method == m]
             if sub.empty:
                 continue
+            g = sub.groupby("round")["acc"]
+            mean = g.mean()
             color, ls = STYLE[m]
             lw = 2.6 if m == "Ours" else 1.4
             z = 6 if m == "Ours" else 3
-            ax.plot(sub["round"], sub["acc"], ls, color=color, lw=lw,
+            ax.plot(mean.index, mean.values, ls, color=color, lw=lw,
                     label=m, zorder=z)
+            if multi:
+                std = g.std(ddof=1).fillna(0.0)
+                ax.fill_between(mean.index, mean.values - std.values,
+                                mean.values + std.values, color=color,
+                                alpha=0.10, lw=0, zorder=z - 1)
         ax.axhline(a.thresh, ls=":", lw=1, color="#aaaaaa")
         ax.set_title(name, fontsize=11)
         ax.set_xlabel("Federated round", fontsize=9)
@@ -89,8 +97,8 @@ def main():
                           lw=2.6 if m == "Ours" else 1.4) for m in STYLE]
     fig.legend(handles, list(STYLE), loc="lower center", ncol=len(STYLE),
                frameon=False, fontsize=9, bbox_to_anchor=(0.5, -0.02))
-    fig.suptitle("Convergence speed by aggregation algorithm across datasets "
-                 f"(dotted = {a.thresh:.0f}% threshold)", fontsize=12.5)
+    #fig.suptitle("Convergence speed by aggregation algorithm across datasets "
+    #             f"(dotted = {a.thresh:.0f}% threshold)", fontsize=12.5)
     fig.tight_layout(rect=[0, 0.03, 1, 0.96])
     for e in ("png", "pdf"):
         fig.savefig(f"{a.out}.{e}", dpi=220, bbox_inches="tight")
