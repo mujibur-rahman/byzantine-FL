@@ -583,6 +583,7 @@ def resolve_data_paths(data_dir: str, overrides: list[str]) -> None:
 
 
 def main() -> None:
+    global DATASETS, ATTACKS, SEEDS, N_CLIENTS, PER_ROUND, ROUNDS
     ap = argparse.ArgumentParser()
     ap.add_argument("--stage", choices=["factorial", "sweep", "report"],
                     required=True)
@@ -590,7 +591,40 @@ def main() -> None:
                     help="directory holding the per-dataset CSVs")
     ap.add_argument("--data", nargs="+", default=None,
                     help="per-dataset path overrides, e.g. nyc_taxi=nyc.csv")
+    ap.add_argument("--datasets", nargs="+", default=None,
+                    help="restrict the grid to these datasets "
+                         f"(subset of {DATASETS})")
+    ap.add_argument("--attacks", nargs="+", default=None,
+                    help=f"restrict the grid to these attacks (subset of {ATTACKS})")
+    ap.add_argument("--seeds", type=int, default=None,
+                    help="number of seeds to use (default 5 factorial / 3 sweep)")
+    ap.add_argument("--rounds", type=int, default=None,
+                    help=f"FL rounds per run (default {ROUNDS})")
+    ap.add_argument("--clients", type=int, default=None,
+                    help=f"total clients (default {N_CLIENTS})")
+    ap.add_argument("--per-round", type=int, default=None, dest="per_round",
+                    help=f"clients sampled per round (default {PER_ROUND})")
     args = ap.parse_args()
+
+    # Apply grid / protocol overrides before building the grid.
+    if args.datasets:
+        bad = [d for d in args.datasets if d not in DATASETS]
+        if bad:
+            sys.exit(f"--datasets unknown: {bad} (choose from {DATASETS})")
+        DATASETS = list(args.datasets)
+    if args.attacks:
+        bad = [a for a in args.attacks if a not in ATTACKS]
+        if bad:
+            sys.exit(f"--attacks unknown: {bad} (choose from {ATTACKS})")
+        ATTACKS = list(args.attacks)
+    if args.seeds is not None:
+        SEEDS = list(range(args.seeds))
+    if args.rounds is not None:
+        ROUNDS = args.rounds
+    if args.clients is not None:
+        N_CLIENTS = args.clients
+    if args.per_round is not None:
+        PER_ROUND = args.per_round
 
     resolve_data_paths(args.data_dir, args.data)
 
