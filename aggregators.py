@@ -177,13 +177,33 @@ class MultiLayerAggregator:
 
     def __init__(self, n_clients, tau=2.0, alpha=0.8, delta=0.2,
                  trust_decay=0.05, trust_reward=0.05, trust_thresh=0.3,
-                 kappa_val_size=500):
+                 kappa_val_size=500,
+                 use_outlier=True, use_trust=True, use_kappa=True):
         self.tau         = tau          # outlier z-score threshold
         self.alpha       = alpha        # EMA trust decay
         self.delta       = delta        # Kappa threshold
         self.trust_decay = trust_decay
         self.trust_reward= trust_reward
         self.trust_thresh= trust_thresh
+        # ── Layer toggles (for the ablation study, run_ablation.py) ────────
+        # use_outlier : Layer 1 (coordinate-wise z-score outlier detection)
+        # use_trust   : Layer 2 (EMA trust scoring + trust-threshold exclusion)
+        # use_kappa   : Layer 3 (Cohen's-Kappa semantic-divergence flag)
+        # Disabling a layer removes ITS contribution only: a disabled Layer 2
+        # means unflagged clients get weight 1.0 (not their trust score), never
+        # 0; a disabled Layer 1/3 means that flag can never fire. All other
+        # behaviour (sampling, partition, warm-up, staleness) is unchanged.
+        # Defaults are all True, so every non-ablation caller is unaffected.
+        self.use_outlier = use_outlier
+        self.use_trust   = use_trust
+        self.use_kappa   = use_kappa
+        # Per-aggregation exclusion log: list of (client_ids, excluded_bool)
+        # tuples, one entry per aggregate() call. "excluded" means the client's
+        # final aggregation weight was zero (caught by whichever layers are on).
+        # Lets an external harness score detection consistently with the active
+        # toggles, instead of re-deriving it from raw kappas/flags. Reset here
+        # so each fresh aggregator instance starts with an empty log.
+        self.flag_log    = []
         # Kappa is evaluated on a fixed random subsample of D_val of this size
         # (the layer cost is n inferences over the val set; subsampling cuts the
         # dominant overhead constant with negligible detection impact). None or
@@ -246,7 +266,7 @@ class MultiLayerAggregator:
 
         # ── Layer 1: Outlier detection ────────────────────────────────────
         norms = np.array([np.linalg.norm(u) for u in updates])
-        if norms.std() < 1e-10:
+        if (not self.use_outlier) or norms.std() < 1e-10:
             outlier_flags = np.zeros(n, dtype=bool)
         else:
             z_scores = np.abs((norms - norms.mean()) / norms.std())
@@ -260,20 +280,26 @@ class MultiLayerAggregator:
         # not a tiny lr-scaled step (which saturates kappa near 1 and makes the
         # threshold inert). Reference is the version the client trained on when
         # ref_params_list is supplied (staleness-corrected), else current.
-        for j, (u, cid) in enumerate(zip(updates, client_ids)):
-            base = (ref_params_list[j] if ref_params_list is not None
-                    else global_params)
-            kappas.append(compute_kappa(base + u, base, Xk, scaler))
-        kappas = np.array(kappas)
-
-        # Peer-relative lower-tail Kappa flag (dataset-agnostic). Falls back to
-        # the absolute delta when there are too few clients for a stable MAD.
-        if n >= 5:
-            med = np.median(kappas)
-            mad = np.median(np.abs(kappas - med)) + 1e-9
-            kappa_flag = kappas < (med - self.k_mad * 1.4826 * mad)
+        # When the Kappa layer is disabled (ablation) we skip the computation
+        # entirely — it is the dominant per-round cost — and report neutral
+        # kappas so the return signature and downstream logging are unchanged.
+        if self.use_kappa:
+            for j, (u, cid) in enumerate(zip(updates, client_ids)):
+                base = (ref_params_list[j] if ref_params_list is not None
+                        else global_params)
+                kappas.append(compute_kappa(base + u, base, Xk, scaler))
+            kappas = np.array(kappas)
+            # Peer-relative lower-tail Kappa flag (dataset-agnostic). Falls back
+            # to the absolute delta when too few clients for a stable MAD.
+            if n >= 5:
+                med = np.median(kappas)
+                mad = np.median(np.abs(kappas - med)) + 1e-9
+                kappa_flag = kappas < (med - self.k_mad * 1.4826 * mad)
+            else:
+                kappa_flag = kappas < self.delta
         else:
-            kappa_flag = kappas < self.delta
+            kappas = np.ones(n)
+            kappa_flag = np.zeros(n, dtype=bool)
 
         # ── Warm-up: while the global model is still unstable, kappa is noisy/
         # degenerate, so filtering drops honest clients and slows convergence.
@@ -287,17 +313,36 @@ class MultiLayerAggregator:
         # NOT scale honest clients — weighting unflagged clients by raw kappa
         # penalises honest non-IID clients (kappa~0.5-0.7) and wrecks
         # convergence. Unflagged clients are weighted by trust only.
+        #
+        # Layer toggles: `flagged` collapses only the ACTIVE detection layers
+        # (Layer 1 outlier, Layer 3 kappa). Layer 2 (trust) contributes the
+        # trust-threshold exclusion and the trust weight; when disabled,
+        # unflagged clients get weight 1.0 and there is no trust exclusion, so
+        # the layer's multiplicative contribution is exactly 1.0 (never 0).
+        excluded = np.zeros(n, dtype=bool)
         for j, cid in enumerate(client_ids):
-            flagged = bool(outlier_flags[j] or kappa_flag[j])
+            flagged = bool((self.use_outlier and outlier_flags[j])
+                           or (self.use_kappa and kappa_flag[j]))
             S = 0.0 if flagged else 1.0
+            # Keep the trust EMA state current regardless, so toggling trust
+            # off then on across an ablation grid never leaves stale state;
+            # it only *affects the weight* when use_trust is True.
             self.trust_scores[cid] = (self.alpha * self.trust_scores[cid]
                                       + (1.0 - self.alpha) * S)
-            if flagged or self.trust_scores[cid] < self.trust_thresh:
-                weights.append(0.0)
+            if flagged:
+                w = 0.0
+            elif self.use_trust:
+                w = (0.0 if self.trust_scores[cid] < self.trust_thresh
+                     else self.trust_scores[cid])
             else:
-                weights.append(self.trust_scores[cid])
+                w = 1.0
+            weights.append(w)
+            excluded[j] = (w == 0.0)
 
         weights = np.array(weights)
+        # Record this round's exclusion decision for external detection scoring
+        # (consistent with whichever layers are currently enabled).
+        self.flag_log.append((list(client_ids), excluded.copy()))
 
         # ── Staleness weighting (buffered semi-async / FedBuff) ───────────
         if stalenesses is not None:

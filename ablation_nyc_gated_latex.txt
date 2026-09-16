@@ -1,0 +1,21 @@
+\begin{table}[h]
+\centering
+\scriptsize
+\caption{Layer ablation (20\% Byzantine, mean$\pm$s.d.\ over 3 seeds). $\Delta$ vs.\ Full in parentheses. Separation-gated Kappa.}
+\label{table:accuracy_ablation}
+\begin{tabular}{llcc}
+\hline
+\textbf{Attack} & \textbf{Configuration} & \textbf{Acc.\ (\%)} & \textbf{F1 (\%)} \\
+\hline
+lfp & Full & 94.2$\pm$0.4 & 71.0$\pm$2.8 \\
+ & -Outlier & 93.1$\pm$1.1 (-1.1) & 62.6$\pm$8.5 (-8.4) \\
+ & -Trust & 94.2$\pm$0.5 (-0.0) & 70.7$\pm$3.7 (-0.3) \\
+ & -Kappa & 96.0$\pm$0.6 (+1.8) & 82.3$\pm$3.4 (+11.4) \\
+\hline
+grad-p & Full & 92.0$\pm$0.6 & 55.1$\pm$4.8 \\
+ & -Outlier & 89.0$\pm$1.6 (-3.0) & 23.3$\pm$18.0 (-31.8) \\
+ & -Trust & 90.4$\pm$0.7 (-1.7) & 40.2$\pm$7.6 (-14.9) \\
+ & -Kappa & 92.0$\pm$0.2 (-0.0) & 57.4$\pm$2.6 (+2.2) \\
+\hline
+\end{tabular}
+\end{table}

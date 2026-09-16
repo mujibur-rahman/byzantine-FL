@@ -1,0 +1,21 @@
+\begin{table}[h]
+\centering
+\scriptsize
+\caption{Layer ablation on real data (20\% Byzantine, mean$\pm$s.d.\ over 3 seeds). $\Delta$ vs.\ Full in parentheses.}
+\label{table:accuracy_ablation}
+\begin{tabular}{llcc}
+\hline
+\textbf{Attack} & \textbf{Configuration} & \textbf{Acc.\ (\%)} & \textbf{F1 (\%)} \\
+\hline
+lfp & Full & 88.2$\pm$1.3 & 58.8$\pm$6.7 \\
+ & -Outlier & 87.9$\pm$1.1 (-0.3) & 57.4$\pm$5.9 (-1.5) \\
+ & -Trust & 88.7$\pm$1.6 (+0.5) & 61.0$\pm$8.0 (+2.1) \\
+ & -Kappa & 92.9$\pm$0.7 (+4.7) & 79.3$\pm$2.9 (+20.5) \\
+\hline
+grad-p & Full & 86.9$\pm$2.3 & 50.9$\pm$13.2 \\
+ & -Outlier & 84.0$\pm$2.1 (-2.8) & 33.9$\pm$13.5 (-16.9) \\
+ & -Trust & 86.2$\pm$1.7 (-0.7) & 47.4$\pm$10.2 (-3.4) \\
+ & -Kappa & 90.5$\pm$1.0 (+3.6) & 69.3$\pm$4.5 (+18.4) \\
+\hline
+\end{tabular}
+\end{table}
